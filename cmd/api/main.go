@@ -1,0 +1,36 @@
+package main
+
+import (
+	"github.com/Marcello1446/vatify/config"
+	"github.com/Marcello1446/vatify/internal/database"
+	"github.com/Marcello1446/vatify/internal/model"
+	"github.com/labstack/echo/v5"
+	"log"
+	"net/http"
+)
+
+func main() {
+	e := echo.New()
+	env, err := config.LoadEnv()
+	if err != nil {
+		log.Fatal("Failed to load config: ", err)
+	}
+
+	db, err := database.InitDB(env)
+	if err != nil {
+		log.Fatal("Failed to launch database:", err)
+	}
+
+	er := db.AutoMigrate(&model.APIKey{}, &model.Validation{})
+	if er != nil {
+		log.Fatal("Failed to migrate:", er)
+	}
+
+	e.GET("/", func(c *echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
+	})
+
+	if err := e.Start(":" + env.ServerPort); err != nil {
+		log.Fatal("Failed to start a server:", err)
+	}
+}
