@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Marcello1446/vatify/config"
 	"github.com/Marcello1446/vatify/internal/database"
+	"github.com/Marcello1446/vatify/internal/handler"
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/labstack/echo/v5"
 	"log"
@@ -29,6 +30,8 @@ func main() {
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
 	})
+
+	e.POST("/v1/validate", handler.ValidateHandler(db))
 
 	if err := e.Start(":" + env.ServerPort); err != nil {
 		log.Fatal("Failed to start a server:", err)
