@@ -7,7 +7,6 @@ import (
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/labstack/echo/v5"
 	"log"
-	"net/http"
 )
 
 func main() {
@@ -26,10 +25,6 @@ func main() {
 	if er != nil {
 		log.Fatal("Failed to migrate:", er)
 	}
-
-	e.GET("/", func(c *echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
-	})
 
 	e.POST("/v1/validate", handler.ValidateHandler(db))
 
