@@ -10,6 +10,7 @@ type Validation struct {
 	VAT         string
 	CountryCode string
 	TradeName   string
+	Address     string
 	IsVATValid  bool
 	CheckedAt   time.Time
 }

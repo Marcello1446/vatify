@@ -27,6 +27,7 @@ func main() {
 	}
 
 	e.POST("/v1/validate", handler.ValidateHandler(db))
+	e.POST("/v1/keys", handler.APIKeyHandler(db))
 
 	if err := e.Start(":" + env.ServerPort); err != nil {
 		log.Fatal("Failed to start a server:", err)

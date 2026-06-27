@@ -23,6 +23,7 @@ func ValidateVAT(db *gorm.DB, vat string, countryCode string) (*model.Validation
 			VAT:         res.CleanedVAT,
 			CountryCode: res.CountryCode,
 			TradeName:   res.TradeName,
+			Address:     res.Address,
 			IsVATValid:  res.IsValid,
 			CheckedAt:   time.Now(),
 		}
@@ -64,9 +65,8 @@ func ValidateVAT(db *gorm.DB, vat string, countryCode string) (*model.Validation
 
 		return v, nil
 
-	} else {
-		return validation, nil
 	}
 
 	return validation, nil
+
 }
