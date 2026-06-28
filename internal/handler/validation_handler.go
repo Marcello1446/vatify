@@ -2,16 +2,16 @@ package handler
 
 import (
 	"net/http"
-
 	"github.com/Marcello1446/vatify/internal/repository"
 	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
+
 type Request struct {
-	VAT         string `json:"vat"`
-	CountryCode string `json:"country_code"`
+	VAT         string `json:"vat" validate:"required,numeric,min=8,max=13"`
+	CountryCode string `json:"country_code" validate:"required,len=2,alpha,uppercase"`
 }
 
 type Response struct {
@@ -24,12 +24,19 @@ type Response struct {
 
 func ValidateHandler(db *gorm.DB) echo.HandlerFunc {
 	return func(c *echo.Context) error {
+		
 		k := c.Get("api_key").(string)
-		var req *Request
+		var req Request
 
 		if err := c.Bind(&req); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "failed to bind data",
+			})
+		}
+
+		if err := c.Validate(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"Error": "Failed to validate your request. Country Code either VAT number has incorrect format",
 			})
 		}
 
