@@ -10,9 +10,18 @@ import (
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/go-playground/validator/v10"
+	"github.com/swaggo/echo-swagger"
+	_ "github.com/Marcello1446/vatify/docs"
 	"github.com/labstack/echo/v5"
 	"github.com/robfig/cron/v3"
 )
+
+// @title  VATify API
+// @version 1.0
+// @description VATify is a reliable EU VAT number validation API. It wraps the official VIES service with caching, audit logging, and tiered API key access.
+// @host vatify.swagger.io
+// @BasePath /v1
+
 
 
 
@@ -55,6 +64,7 @@ func main() {
 		}
 	})
 
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.POST("/v1/validate", handler.ValidateHandler(db), middleware.AuthAPIKey(db))
 	e.POST("/v1/keys", handler.APIKeyHandler(db))
 	e.GET("/v1/usage", handler.SeeUsage(db), middleware.AuthAPIKey(db))
