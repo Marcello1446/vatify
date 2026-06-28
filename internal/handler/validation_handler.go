@@ -22,6 +22,7 @@ type Response struct {
 
 func ValidateHandler(db *gorm.DB) echo.HandlerFunc {
 	return func(c *echo.Context) error {
+		k := c.Get("api_key").(string)
 		var req *Request
 
 		if err := c.Bind(&req); err != nil {
@@ -30,7 +31,7 @@ func ValidateHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		val, err := service.ValidateVAT(db, req.VAT, req.CountryCode)
+		val, err := service.ValidateVAT(k, db, req.VAT, req.CountryCode)
 
 		if err != nil {
 			return c.JSON(http.StatusNotFound, map[string]string{

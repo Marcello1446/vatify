@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func ValidateVAT(db *gorm.DB, vat string, countryCode string) (*model.Validation, error) {
+func ValidateVAT(api_key string, db *gorm.DB, vat string, countryCode string) (*model.Validation, error) {
 	validation, err := repository.FindValidation(db, vat, countryCode)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -32,6 +32,12 @@ func ValidateVAT(db *gorm.DB, vat string, countryCode string) (*model.Validation
 
 		if erra != nil {
 			return nil, erra
+		}
+
+		errr := repository.IncreaseUsedRequests(db, api_key)
+
+		if errr != nil {
+			return nil, errr
 		}
 
 		return v, nil
@@ -63,10 +69,23 @@ func ValidateVAT(db *gorm.DB, vat string, countryCode string) (*model.Validation
 			return nil, erra
 		}
 
+		errr := repository.IncreaseUsedRequests(db, api_key)
+
+		if errr != nil {
+			return nil, errr
+		}
+
 		return v, nil
 
 	}
 
+	errr := repository.IncreaseUsedRequests(db, api_key)
+
+	if errr != nil {
+		return nil, errr
+	}
+
+	
 	return validation, nil
 
 }
