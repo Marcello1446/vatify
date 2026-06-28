@@ -4,9 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"time"
-	"gorm.io/gorm"
+
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/Marcello1446/vatify/internal/repository"
+	"gorm.io/gorm"
 )
 
 func HashAPIKey(db *gorm.DB, email string, plan string) (string, error) {
@@ -44,4 +45,23 @@ func HashAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	}
 
 	return encoded_string, nil
+}
+
+
+func ResetRequests(db *gorm.DB) error {
+	api_keys, err := repository.FindAllAPIKeysUsageReset(db)
+
+	if err != nil {
+		return err
+	}
+
+	for _, v := range api_keys {
+		err := repository.ResetRequestsUsed(db, &v)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
