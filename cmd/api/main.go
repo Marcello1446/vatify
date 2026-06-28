@@ -29,6 +29,7 @@ func main() {
 
 	e.POST("/v1/validate", handler.ValidateHandler(db), middleware.AuthAPIKey(db))
 	e.POST("/v1/keys", handler.APIKeyHandler(db))
+	e.GET("/v1/usage", handler.SeeUsage(db), middleware.AuthAPIKey(db))
 
 	if err := e.Start(":" + env.ServerPort); err != nil {
 		log.Fatal("Failed to start a server:", err)
