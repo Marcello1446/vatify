@@ -4,44 +4,40 @@ import (
 	"log"
 
 	"github.com/Marcello1446/vatify/config"
+	_ "github.com/Marcello1446/vatify/docs"
 	"github.com/Marcello1446/vatify/internal/database"
 	"github.com/Marcello1446/vatify/internal/handler"
 	"github.com/Marcello1446/vatify/internal/middleware"
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/go-playground/validator/v10"
-	"github.com/swaggo/echo-swagger"
-	_ "github.com/Marcello1446/vatify/docs"
 	"github.com/labstack/echo/v5"
 	"github.com/robfig/cron/v3"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 )
 
 // @title  VATify API
 // @version 1.0
 // @description VATify is a reliable EU VAT number validation API. It wraps the official VIES service with caching, audit logging, and tiered API key access.
-// @host vatify.swagger.io
+// @host localhost:8080
 // @BasePath /v1
-
-
-
 
 var scheduler = cron.New()
 
 type CustomValidator struct {
-  validator *validator.Validate
+	validator *validator.Validate
 }
 
 func (cv *CustomValidator) Validate(i any) error {
-  if err := cv.validator.Struct(i); err != nil {
-    return echo.ErrBadRequest.Wrap(err)
-  }
-  return nil
+	if err := cv.validator.Struct(i); err != nil {
+		return echo.ErrBadRequest.Wrap(err)
+	}
+	return nil
 }
 
 func main() {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
-	
 
 	env, err := config.LoadEnv()
 	if err != nil {
@@ -75,5 +71,4 @@ func main() {
 		log.Println("Failed to start a server:", err)
 	}
 
-	
 }
