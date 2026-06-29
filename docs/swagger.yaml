@@ -1,0 +1,141 @@
+basePath: /v1
+definitions:
+  handler.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.ErrorResponses:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.Login:
+    properties:
+      email:
+        type: string
+      plan:
+        type: string
+    type: object
+  handler.Request:
+    properties:
+      country_code:
+        type: string
+      vat:
+        maxLength: 13
+        minLength: 8
+        type: string
+    required:
+    - country_code
+    - vat
+    type: object
+  handler.Response:
+    properties:
+      address:
+        type: string
+      country_code:
+        type: string
+      is_valid:
+        type: boolean
+      trade_name:
+        type: string
+      vat:
+        type: string
+    type: object
+  handler.UsageResponse:
+    properties:
+      plan:
+        type: string
+      request_limit:
+        type: integer
+      requests_used:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: VATify is a reliable EU VAT number validation API. It wraps the official
+    VIES service with caching, audit logging, and tiered API key access.
+  title: VATify API
+  version: "1.0"
+paths:
+  /keys:
+    post:
+      consumes:
+      - application/json
+      description: Generates API key based on plan
+      parameters:
+      - description: Login and email
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponses'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponses'
+      summary: Generates API key based on plan
+  /usage:
+    get:
+      consumes:
+      - application/json
+      description: Gets already used requests, plan and limit
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UsageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Gets already used requests, plan and limit
+  /validate:
+    post:
+      consumes:
+      - application/json
+      description: Gets VAT and Country Code
+      parameters:
+      - description: VAT and country code
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Gets VAT and Country Code
+swagger: "2.0"

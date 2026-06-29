@@ -13,6 +13,21 @@ type Login struct {
 	Plan  string `json:"plan"`
 }
 
+type ErrorResponses struct {
+    Error string `json:"error"`
+}
+
+
+// APIKeyHandler Generates API key based on plan
+// @Summary      Generates API key based on plan
+// @Description  Generates API key based on plan
+// @Accept       json
+// @Produce      json
+// @Param        body   body    Login  true "Login and email"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  ErrorResponses
+// @Failure      404  {object}  ErrorResponses
+// @Router       /keys [post]
 func APIKeyHandler(db *gorm.DB) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var login Login

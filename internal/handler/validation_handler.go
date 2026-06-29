@@ -14,6 +14,12 @@ type Request struct {
 	CountryCode string `json:"country_code" validate:"required,len=2,alpha,uppercase"`
 }
 
+type UsageResponse struct {
+	Plan         string `json:"plan"`
+	RequestsUsed int    `json:"requests_used"`
+	RequestLimit int    `json:"request_limit"`
+}
+
 type Response struct {
 	VAT         string `json:"vat"`
 	CountryCode string `json:"country_code"`
@@ -22,6 +28,21 @@ type Response struct {
 	IsValid     bool   `json:"is_valid"`
 }
 
+type ErrorResponse struct {
+    Error string `json:"error"`
+}
+
+
+// ValidateHandler Gets VAT and Country Code
+// @Summary      Gets VAT and Country Code
+// @Description  Gets VAT and Country Code
+// @Accept       json
+// @Produce      json
+// @Param        body   body     Request  true "VAT and country code"
+// @Success      200  {object}  Response
+// @Failure      400  {object}  ErrorResponse
+// @Failure      404  {object}  ErrorResponse
+// @Router       /validate [post]
 func ValidateHandler(db *gorm.DB) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		
@@ -58,7 +79,15 @@ func ValidateHandler(db *gorm.DB) echo.HandlerFunc {
 	}
 }
 
-
+// SeeUsage Gets already used requests, plan and limit
+// @Summary      Gets already used requests, plan and limit
+// @Description  Gets already used requests, plan and limit
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  UsageResponse
+// @Failure      400  {object}  ErrorResponse
+// @Failure      404  {object}  ErrorResponse
+// @Router       /usage [get]
 func SeeUsage(db *gorm.DB) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		k := c.Get("api_key").(string)
