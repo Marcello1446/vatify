@@ -10,4 +10,3 @@ WORKDIR /app
 COPY --from=builder /vatify /vatify 
 EXPOSE 8080
 CMD ["/vatify"]
-
