@@ -64,6 +64,8 @@ func main() {
 	e.POST("/v1/validate", handler.ValidateHandler(db), middleware.AuthAPIKey(db))
 	e.POST("/v1/keys", handler.APIKeyHandler(db))
 	e.GET("/v1/usage", handler.SeeUsage(db), middleware.AuthAPIKey(db))
+	e.POST("/v1/checkout/sessions", handler.CheckoutHandler(db, *env))
+	e.POST("/v1/webhook", handler.WebhookHandler(db, *env))
 
 	scheduler.Start()
 
