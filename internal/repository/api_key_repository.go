@@ -62,3 +62,13 @@ func ResetRequestsUsed(db *gorm.DB, api_key *model.APIKey) error {
 
 	return nil
 } 
+
+func FindAPIKeyByEmail(db *gorm.DB, email string) (*model.APIKey, error) {
+	var api_key *model.APIKey
+
+	if res := db.Where("owner = ?", email).First(&api_key); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return api_key, nil
+}

@@ -6,12 +6,17 @@ import (
 )
 
 type Env struct {
-	DbHost     string
-	DbPort     string
-	DbUser     string
-	DbPassword string
-	DbName     string
-	ServerPort string
+	DbHost              string
+	DbPort              string
+	DbUser              string
+	DbPassword          string
+	DbName              string
+	ServerPort          string
+	StripeSecretKey     string
+	ProPriceId          string
+	StarterPriceId      string
+	StripeWebhookSecret string
+
 }
 
 func LoadEnv() (*Env, error) {
@@ -25,7 +30,12 @@ func LoadEnv() (*Env, error) {
 		DbUser:     os.Getenv("DB_USER"),
 		DbPassword: os.Getenv("DB_PASSWORD"),
 		DbName:     os.Getenv("DB_NAME"),
-		ServerPort: os.Getenv("SERVER_PORT")}
+		ServerPort: os.Getenv("SERVER_PORT"),
+		StripeSecretKey: os.Getenv("STRIPE_SECRET_KEY"),
+		ProPriceId: os.Getenv("STRIPE_PRO_PRICE_ID"),
+		StarterPriceId: os.Getenv("STRIPE_STARTER_PRICE_ID"),
+		StripeWebhookSecret: os.Getenv("STRIPE_WEBHOOK_SECRET"),
+	}
 
 	return env, nil
 }

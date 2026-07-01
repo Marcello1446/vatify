@@ -4,13 +4,22 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"time"
-
+	"errors"
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/Marcello1446/vatify/internal/repository"
 	"gorm.io/gorm"
 )
 
 func HashAPIKey(db *gorm.DB, email string, plan string) (string, error) {
+
+	_, err := repository.FindAPIKeyByEmail(db, email)
+
+	if err == nil {
+    	return "", errors.New("email already exists")
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+    	return "", err
+	}
+
 	var request_limit int
 
 	if plan == "free" {
@@ -22,8 +31,8 @@ func HashAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	}
 
 	key := make([]byte, 32)
-	_, err := rand.Read(key)
-	if err != nil {
+	_, errr := rand.Read(key)
+	if errr != nil {
     	return "", err
 	}
 	encoded_string := hex.EncodeToString(key)
@@ -38,9 +47,9 @@ func HashAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 		UsageReset: time.Now().AddDate(0, 1, 0),
 	}
 
-	errr := repository.SaveAPIKey(db, api_key_instance)
+	errrr := repository.SaveAPIKey(db, api_key_instance)
 
-	if errr != nil {
+	if errrr != nil {
 		return "", errr
 	}
 
@@ -61,6 +70,31 @@ func ResetRequests(db *gorm.DB) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func UpgradePlan(db *gorm.DB, email, plan string) error {
+	api_key_instance, err := repository.FindAPIKeyByEmail(db, email)
+
+	if err != nil {
+		return err
+	}
+
+	var request_limit int
+
+	if plan == "starter" {
+		request_limit = 10000
+	} else if plan == "pro" {
+		request_limit = 100000
+	} 
+
+	api_key_instance.Plan = plan
+	api_key_instance.RequestLimit = request_limit
+
+	if res := db.Save(&api_key_instance); res.Error != nil {
+		return res.Error
 	}
 
 	return nil

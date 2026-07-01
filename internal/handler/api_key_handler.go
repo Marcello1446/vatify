@@ -41,9 +41,14 @@ func APIKeyHandler(db *gorm.DB) echo.HandlerFunc {
 		api_key, err := service.HashAPIKey(db, login.Email, login.Plan)
 
 		if err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{
-				"Error": "Failed to collect data from service. APIKEY",
-			})
+    		if err.Error() == "email already exists" {
+        		return c.JSON(http.StatusConflict, map[string]string{
+            		"Error": "An API key with this email already exists",
+        		})
+    		}
+    		return c.JSON(http.StatusInternalServerError, map[string]string{
+        		"Error": "Failed to create API key",
+    		})
 		}
 
 		return c.JSON(http.StatusOK, map[string]string{

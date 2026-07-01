@@ -13,6 +13,7 @@ func AuthAPIKey(db *gorm.DB) echo.MiddlewareFunc {
 		return func(c *echo.Context) error {
 		
 		key := c.Request().Header.Get("X-API-Key")
+		
 
 		if len(key) == 0 {
 			return c.JSON(http.StatusBadRequest, map[string]string {
