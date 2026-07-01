@@ -38,7 +38,7 @@ func APIKeyHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		api_key, err := service.HashAPIKey(db, login.Email, login.Plan)
+		api_key, err := service.GenerateAPIKey(db, login.Email, login.Plan)
 
 		if err != nil {
     		if err.Error() == "email already exists" {
