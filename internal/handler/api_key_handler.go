@@ -9,8 +9,8 @@ import (
 )
 
 type Login struct {
-	Email string `json:"email"`
-	Plan  string `json:"plan"`
+	Email string `json:"email" validate:"required,email,min=4"`
+	Plan  string `json:"plan" validate:"required,oneof=free starter pro"`
 }
 
 type ErrorResponses struct {
@@ -38,6 +38,12 @@ func APIKeyHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
+		if err := c.Validate(&login); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"Error": "Failed to validate data",
+			})
+		}
+		
 		api_key, err := service.GenerateAPIKey(db, login.Email, login.Plan)
 
 		if err != nil {

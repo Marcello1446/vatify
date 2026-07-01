@@ -11,7 +11,7 @@ import (
 
 type Request struct {
 	VAT         string `json:"vat" validate:"required,numeric,min=8,max=13"`
-	CountryCode string `json:"country_code" validate:"required,len=2,alpha,uppercase"`
+	CountryCode string `json:"country_code" validate:"required,len=2,alpha,uppercase,oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SL SK XI"`
 }
 
 type UsageResponse struct {
