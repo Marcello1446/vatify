@@ -12,6 +12,7 @@ require (
 require (
 	github.com/stripe/stripe-go/v78 v78.12.0 // indirect
 	github.com/stripe/stripe-go/v86 v86.1.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 )
 
 require (

@@ -89,10 +89,14 @@ func UpgradePlan(db *gorm.DB, email, plan string) error {
 		request_limit = 10000
 	} else if plan == "pro" {
 		request_limit = 100000
-	} 
+	} else {
+		return errors.New("Plan is not valid - choose pro or starter")
+	}
 
 	api_key_instance.Plan = plan
 	api_key_instance.RequestLimit = request_limit
+	api_key_instance.RequestsUsed = 0
+	api_key_instance.UsageReset = time.Now().AddDate(0, 1, 0)
 
 	if res := db.Save(&api_key_instance); res.Error != nil {
 		return res.Error

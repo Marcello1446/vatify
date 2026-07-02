@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-
+	"net/http"
+	"time"
 	"github.com/Marcello1446/vatify/config"
 	_ "github.com/Marcello1446/vatify/docs"
 	"github.com/Marcello1446/vatify/internal/database"
@@ -12,6 +13,7 @@ import (
 	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
+	echoMiddleware "github.com/labstack/echo/v5/middleware"
 	"github.com/robfig/cron/v3"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 )
@@ -21,6 +23,27 @@ import (
 // @description VATify is a reliable EU VAT number validation API. It wraps the official VIES service with caching, audit logging, and tiered API key access.
 // @host localhost:8080
 // @BasePath /v1
+
+var echo_config = echoMiddleware.RateLimiterConfig{
+  Skipper: echoMiddleware.DefaultSkipper,
+  Store: echoMiddleware.NewRateLimiterMemoryStoreWithConfig(
+    echoMiddleware.RateLimiterMemoryStoreConfig{Rate: 0.00083, Burst: 3, ExpiresIn: 3 * time.Minute},
+  ),
+  IdentifierExtractor: func(c *echo.Context) (string, error) {
+    id := c.RealIP()
+    return id, nil
+  },
+  ErrorHandler: func(c *echo.Context, err error) error {
+    return c.JSON(http.StatusForbidden, map[string]string{
+		"Error": "Refuses to let you access a webpage or file",
+	})
+  },
+  DenyHandler: func(c *echo.Context, identifier string, err error) error {
+    return c.JSON(http.StatusTooManyRequests, map[string]string{
+		"Error": "Too many requests. Try again later",
+	})
+  },
+}
 
 var scheduler = cron.New()
 
@@ -62,7 +85,7 @@ func main() {
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.POST("/v1/validate", handler.ValidateHandler(db), middleware.AuthAPIKey(db))
-	e.POST("/v1/keys", handler.APIKeyHandler(db))
+	e.POST("/v1/keys", handler.APIKeyHandler(db), echoMiddleware.RateLimiterWithConfig(echo_config))
 	e.GET("/v1/usage", handler.SeeUsage(db), middleware.AuthAPIKey(db))
 	e.POST("/v1/checkout/sessions", handler.CheckoutHandler(db, *env))
 	e.POST("/v1/webhook", handler.WebhookHandler(db, *env))
