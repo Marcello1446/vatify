@@ -9,10 +9,7 @@ import (
 )
 
 func InitDB(env *config.Env) (*gorm.DB, error) {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		return nil, err
-	}
+	godotenv.Load("../../.env")
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require", env.DbHost, env.DbUser, env.DbPassword, env.DbName, env.DbPort)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
