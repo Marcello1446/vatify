@@ -56,6 +56,12 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			})
 		}
 
+		if len(checkout_session.Metadata["plan"]) == 0 {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"Error": "Failed to read a 'plan' field",
+			})
+		}
+
 		if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"]); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Failed to upgrade plan",
