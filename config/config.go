@@ -20,10 +20,7 @@ type Env struct {
 }
 
 func LoadEnv() (*Env, error) {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		return nil, err
-	}
+	godotenv.Load("../../.env")
 	env := &Env{
 		DbHost:     os.Getenv("DB_HOST"),
 		DbPort:     os.Getenv("DB_PORT"),
