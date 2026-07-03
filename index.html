@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VATify — Reliable EU VAT validation</title>
+<link rel="shortcut icon" href="./icon.png" type="image/x-icon">
+<style>
+  :root{
+    --bg: #0f172a;
+    --bg-soft: #131f38;
+    --panel: #1e293b;
+    --panel-border: #334155;
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --text-faint: #64748b;
+    --green: #22c55e;
+    --green-dark: #052e16;
+    --blue: #38bdf8;
+    --green-soft: rgba(34,197,94,0.12);
+    --green-line: rgba(34,197,94,0.35);
+    --red: #f87171;
+    --mono: 'Geist Fallback', 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --sans: 'Geist Fallback', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+  /* page stays flat navy; ambient glow lives only in the hero */
+  body{background-color: var(--bg);}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background-color: 
+color-mix(in oklab, var(--background) 80%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px;}
+  .brand .dot{
+    width:20px; height:20px; border-radius:6px;
+    background:var(--green); color:#04140d;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800;
+  }
+
+  .good {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .good .dot{
+    width:20px; height:20px; border-radius:6px;
+    background:var(--green); color:#04140d;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800;
+  }
+  
+  .nav-links{display:flex; gap:28px; font-size:14px; color:var(--text-dim);}
+  .nav-links a:hover{color:var(--text);}
+  .nav-cta{
+    background:var(--green); color:#04140d; font-weight:600; font-size:14px;
+    padding:9px 16px; border-radius:8px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(52,211,153,0.25);}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding:88px 0 64px;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .hero-bg{
+    position:absolute; inset:-20% -10%; z-index:-1;
+    background:
+      radial-gradient(32% 50% at 14% 22%, rgba(34,197,94,0.16), transparent 62%),
+      radial-gradient(46% 60% at 84% 62%, rgba(56,189,248,0.16), transparent 60%),
+      radial-gradient(26% 40% at 60% 90%, rgba(34,197,94,0.08), transparent 60%);
+    filter:blur(50px) saturate(120%);
+    background-size:200% 200%;
+    animation: heroDrift 20s ease-in-out infinite;
+  }
+  @keyframes heroDrift{
+    0%{background-position:0% 0%, 100% 0%, 50% 100%;}
+    50%{background-position:20% 25%, 70% 45%, 40% 60%;}
+    100%{background-position:0% 0%, 100% 0%, 50% 100%;}
+  }
+  .hero-grain{
+    position:absolute; inset:0; z-index:-1; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image: radial-gradient(60% 60% at 50% 30%, black, transparent 90%);
+  }
+  .hero-orb{
+    position:absolute; z-index:-1; border-radius:50%;
+    opacity:0.6;
+    animation: dotTwinkle 5s ease-in-out infinite;
+  }
+  .hero-orb.o1{
+    width:5px; height:5px; top:20%; left:9%;
+    background:var(--green);
+    box-shadow:0 0 10px 2px rgba(34,197,94,0.55);
+    animation-delay:0s;
+  }
+  .hero-orb.o2{
+    width:4px; height:4px; top:23%; left:83%;
+    background:var(--green);
+    box-shadow:0 0 9px 2px rgba(34,197,94,0.5);
+    animation-delay:1.2s;
+  }
+  .hero-orb.o3{
+    width:4px; height:4px; top:59%; left:13%;
+    background:var(--green);
+    box-shadow:0 0 9px 2px rgba(34,197,94,0.5);
+    animation-delay:2.4s;
+  }
+  .hero-orb.o4{
+    width:4px; height:4px; top:55%; left:91%;
+    background:var(--blue);
+    box-shadow:0 0 10px 2px rgba(56,189,248,0.55);
+    animation-delay:.6s;
+  }
+  .hero-orb.o5{
+    width:5px; height:5px; top:68%; left:71%;
+    background:var(--green);
+    box-shadow:0 0 10px 2px rgba(34,197,94,0.5);
+    animation-delay:3.3s;
+  }
+  @keyframes dotTwinkle{
+    0%,100%{opacity:0.25; transform:scale(0.85);}
+    50%{opacity:0.9; transform:scale(1.15);}
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.05fr 1fr; gap:56px; align-items:center;
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12px; color:var(--green);
+    background:var(--green-soft); border:1px solid var(--green-line);
+    padding:6px 12px; border-radius:999px; margin-bottom:24px;
+  }
+  .badge::before{
+    content:''; width:6px; height:6px; border-radius:50%; background:var(--green);
+    box-shadow:0 0 0 3px rgba(52,211,153,0.25);
+  }
+  h1{
+    font-size:53px; line-height:1.12; letter-spacing:-0.02em; font-weight:800;
+    margin-bottom:20px;
+  }
+  h1 .accent{
+    background:linear-gradient(90deg, var(--blue), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    background-size:200% 100%;
+    animation: gradientShift 6s ease-in-out infinite;
+  }
+  @keyframes gradientShift{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+  .hero p.lead{
+    color:var(--text-dim); font-size:16px; max-width:460px; margin-bottom:32px;
+  }
+  .hero-actions{display:flex; gap:12px;}
+  .btn-primary{
+    background:var(--green); color:#04140d; font-weight:600; font-size:14px;
+    padding:12px 20px; border-radius:9px;
+    transition:transform .15s ease, box-shadow .15s ease;
+    border: none;
+    font-family: 'Geist Fallback', 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 22px rgba(52,211,153,0.28);}
+  .btn-ghost{
+    border:1px solid var(--panel-border); color:var(--text);
+    font-weight:600; font-size:14px; padding:12px 20px; border-radius:9px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .btn-ghost:hover{border-color:#39445a; background:rgba(255,255,255,0.02);}
+
+  /* terminal card */
+  .terminal{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:14px; overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+  }
+  .terminal-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:12px 14px; border-bottom:1px solid var(--panel-border);
+    background:rgba(255,255,255,0.015);
+  }
+  .terminal-bar .tdot{width:10px; height:10px; border-radius:50%;}
+  .tdot.r{background:#f87171;} .tdot.y{background:#fbbf24;} .tdot.g{background:#34d399;}
+  .terminal-title{
+    margin-left:8px; font-size:12px; color:var(--text-faint); font-family:var(--mono);
+  }
+  .terminal-body{padding:20px; font-family:var(--mono); font-size:13px; line-height:1.75;}
+  .terminal-body .method{color:var(--green);}
+  .terminal-body .key{color:#7dd3fc;}
+  .terminal-body .str{color:#fbbf24;}
+  .terminal-body .bool{color:#c084fc;}
+  .terminal-body pre{white-space:pre-wrap; word-break:break-word;}
+
+  /* ---------- Stats ---------- */
+  .stats{
+    border-top:1px solid var(--panel-border);
+    border-bottom:1px solid var(--panel-border);
+    padding:36px 0;
+  }
+  .stats-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); text-align:center; gap:12px;
+  }
+  .stat .num{font-size:26px; font-weight:800; color:var(--green);}
+  .stat .label{font-size:13px; color:var(--text-faint); margin-top:4px;}
+
+  /* ---------- Section heading ---------- */
+  section{padding:88px 0;}
+  .section-head{text-align:center; max-width:560px; margin:0 auto 48px;}
+  .section-head h2{font-size:30px; font-weight:800; letter-spacing:-0.01em; margin-bottom:12px;}
+  .section-head p{color:var(--text-dim); font-size:15px;}
+
+  /* ---------- How it works ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+  .step{text-align:center; padding:0 12px;}
+  .step-icon{
+    width:56px; height:56px; border-radius:14px; margin:0 auto 20px;
+    background:var(--panel); border:1px solid var(--panel-border);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .step-icon svg{width:22px; height:22px; stroke:var(--green);}
+  .step-num{
+    position:absolute; top:-8px; right:-8px;
+    width:20px; height:20px; border-radius:50%;
+    background:var(--green); color:#04140d; font-size:11px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step h3{font-size:16px; font-weight:700; margin-bottom:8px;}
+  .step p{color:var(--text-dim); font-size:14px;}
+
+  /* ---------- Feature grid (6 cards) ---------- */
+  .feature-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  }
+  .feature-card{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:12px; padding:24px;
+    transition:transform .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .feature-card:hover{
+    transform:translateY(-3px);
+    border-color:var(--green-line);
+    background:#141c27;
+  }
+  .feature-icon{
+    width:36px; height:36px; border-radius:9px;
+    background:var(--green-soft); border:1px solid var(--green-line);
+    display:flex; align-items:center; justify-content:center; margin-bottom:16px;
+  }
+  .feature-icon svg{width:17px; height:17px; stroke:var(--green);}
+  .feature-card h3{font-size:15px; font-weight:700; margin-bottom:8px;}
+  .feature-card p{font-size:13.5px; color:var(--text-dim);}
+
+  /* ---------- Usage section ---------- */
+  .usage-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center;
+  }
+  .usage-left h2{font-size:34px; font-weight:800; letter-spacing:-0.01em; margin-bottom:14px;}
+  .usage-left p{color:var(--text-dim); font-size:15px; line-height:1.7; margin-bottom:20px;}
+  .usage-pills{display:flex; flex-wrap:wrap; gap:10px;}
+  .usage-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--green-soft); border:1px solid var(--green-line);
+    color:var(--green); font-size:13px; padding:6px 12px; border-radius:999px;
+  }
+  .usage-pill svg{width:14px; height:14px; stroke:var(--green);}
+  .usage-terminal{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:14px; overflow:hidden;
+    box-shadow:0 20px 40px -16px rgba(0,0,0,0.5);
+  }
+  .usage-meter{
+    padding:20px 24px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .meter-label{display:flex; justify-content:space-between; align-items:center; font-size:13px;}
+  .meter-label .ml{color:var(--text-dim);}
+  .meter-label .mr{color:var(--text); font-weight:600;}
+  .meter-bar{height:6px; border-radius:999px; background:var(--panel-border); overflow:hidden;}
+  .meter-fill{height:100%; border-radius:999px; background:linear-gradient(90deg, var(--green), #34d399); transition:width .8s ease;}
+  .meter-note{font-size:12px; color:var(--text-faint);}
+  .usage-response{
+    border-top:1px solid var(--panel-border);
+    padding:16px 20px;
+    font-family:var(--mono); font-size:12.5px; line-height:1.75;
+  }
+
+  .usage-response .key {
+    color: #7dd3fc;
+  }
+  .usage-response .str {
+    color: #fbbf24;
+  }
+  .usage-response .bool {
+    color: #08fa51;
+  }
+
+
+  .usage-response .endpoint{color:var(--text-faint); font-size:13px; margin-bottom:8px;}
+  .endpoint span:nth-child(1) {color: var(--green);}
+  .endpoint span:nth-child(2) {color: var(--text);}
+  @media (max-width:860px){.usage-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Comparison table ---------- */
+  .compare{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:14px; overflow:hidden;
+  }
+  .compare table{width:100%; border-collapse:collapse; font-size:14px;}
+  .compare th{
+    text-align:left; padding:16px 24px; font-size:13px; color:var(--text-dim);
+    border-bottom:1px solid var(--panel-border);
+    margin-bottom: -1px;
+  }
+
+  .compare th.good{color:var(--text);}
+  .compare td{padding:16px 24px; border-bottom:1px solid var(--panel-border);}
+  .compare tr:last-child td{border-bottom:none;}
+  .compare td.row-label{color:var(--text-dim); font-size:13.5px;}
+  .compare td.good{color:var(--text);}
+  .compare td.bad{color:var(--text-faint);}
+  .check{color:var(--green); margin-right:6px;}
+  .cross{color:var(--red); margin-right:6px;}
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+    align-items:stretch;
+  }
+  .price-card{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:14px; padding:28px;
+    display:flex; flex-direction:column;
+    height:100%;
+    position:relative;
+  }
+  @keyframes riseIn{
+    from{opacity:0; transform:translateY(24px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .price-card:nth-child(1){animation: riseIn .6s ease .05s both;}
+  .price-card:nth-child(2){animation: riseIn .6s ease .18s both;}
+  .price-card:nth-child(3){animation: riseIn .6s ease .31s both;}
+  .price-card{transition:transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .35s ease, border-color .35s ease;}
+  .price-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 20px 40px -18px rgba(0,0,0,0.55);
+    border-color:#2b3646;
+  }
+  .price-card.featured{
+    border-color:var(--green-line);
+    background:linear-gradient(180deg, rgba(52,211,153,0.06), var(--panel) 60%);
+  }
+  .price-card.featured:hover{
+    box-shadow:0 20px 44px -16px rgba(52,211,153,0.22);
+  }
+  .price-tag{
+    position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+    background:var(--green); color:#04140d; font-size:11px; font-weight:700;
+    padding:4px 12px; border-radius:999px;
+  }
+  .price-name{font-size:14px; color:var(--text-dim); margin-bottom:10px;}
+  .price-amount{font-size:34px; font-weight:800; margin-bottom:2px;}
+  .price-amount span{font-size:14px; font-weight:500; color:var(--text-faint);}
+  .price-sub{font-size:13px; color:var(--text-faint); margin-bottom:22px;}
+  .price-features{flex:1; display:flex; flex-direction:column; gap:11px; margin-bottom:24px;}
+  .price-features li{font-size:13.5px; color:var(--text-dim); display:flex; gap:8px; align-items:flex-start;}
+  .price-features li svg{flex-shrink:0; width:15px; height:15px; stroke:var(--green); margin-top:2px;}
+  .price-btn{
+    display:block; text-align:center; padding:11px; border-radius:9px;
+    font-size:14px; font-weight:600;
+    border:1px solid var(--panel-border); color:var(--text);
+    transition: transform .15s ease, box-shadow .15s ease;
+    margin-top:auto;
+  }
+  .price-btn:hover {
+    transform: translateY(-1px);
+  }
+  .price-card.featured .price-btn{
+    background:var(--green); color:#04140d; border-color:var(--green);
+  }
+  .price-card.featured .price-btn:hover{box-shadow:0 8px 20px rgba(52,211,153,0.25);}
+
+  /* ---------- CTA form ---------- */
+  .cta-panel{
+    max-width:440px; margin:0 auto;
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:16px; padding:36px; text-align:center;
+  }
+  .cta-panel h2{font-size:22px; font-weight:800; margin-bottom:8px;}
+  .cta-panel p{color:var(--text-dim); font-size:14px; margin-bottom:24px;}
+  .field{text-align:left; margin-bottom:14px;}
+  .field label{font-size:12.5px; color:var(--text-dim); display:block; margin-bottom:6px;}
+  .field input, .field select{
+    width:100%; padding:11px 12px; border-radius:8px;
+    background:var(--bg-soft); border:1px solid var(--panel-border);
+    color:var(--text); font-size:14px; font-family:var(--sans);
+  }
+  .field input:focus, .field select:focus{outline:none; border-color:var(--green-line);}
+  .cta-panel .btn-primary{width:100%; padding:12px; margin-top:6px;}
+
+  /* ---------- Footer ---------- */
+  footer{
+    border-top:1px solid var(--panel-border);
+    padding:36px 0;
+  }
+  .footer-row{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  }
+  .footer-brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px;}
+  .footer-brand .dot{
+    width:18px; height:18px; border-radius:6px; background:var(--green);
+    color:#04140d; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800;
+  }
+  .footer-links{display:flex; gap:22px; font-size:13px; color:var(--text-dim);}
+  .footer-links a:hover{color:var(--text);}
+  .footer-note{font-size:12.5px; color:var(--text-faint);}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr;}
+    .stats-grid{grid-template-columns:repeat(2,1fr); gap:24px;}
+    .steps{grid-template-columns:1fr; gap:36px;}
+    .feature-grid{grid-template-columns:1fr 1fr;}
+    .pricing-grid{grid-template-columns:1fr;}
+    .compare{overflow-x:auto;}
+    h1{font-size:34px;}
+    .footer-row{flex-direction:column; align-items:flex-start;}
+  }
+  @media (max-width:520px){
+    .feature-grid{grid-template-columns:1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav wrap">
+    <div class="brand"><span class="dot">V</span> VATify</div>
+    <nav class="nav-links">
+      <a href="https://vatify-production.up.railway.app/swagger/index.html" target="_blank">Docs</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a href="#cta" class="nav-cta">Get API key</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-orb o1"></div>
+  <div class="hero-orb o2"></div>
+  <div class="hero-orb o3"></div>
+  <div class="hero-orb o4"></div>
+  <div class="hero-orb o5"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="badge">99.9% uptime · VIES fallback built in</span>
+      <h1>Reliable EU VAT<br>validation when<br><span class="accent">VIES goes down</span></h1>
+      <p class="lead">A fast cached JSON API wrapping the official EU VIES service. Your product keeps working even when EU servers don't.</p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">Get free API key</a>
+        <a href="#docs" class="btn-ghost">View docs</a>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+        <span class="terminal-title">vatify — request</span>
+      </div>
+      <div class="terminal-body"><pre><span class="method">POST</span> /v1/validate
+
+{
+  <span class="key">"vat"</span>: <span class="str">"NL857240823B01"</span>,
+  <span class="key">"trade_name"</span>: <span class="str">"Tesla Netherlands B.V."</span>,
+  <span class="key">"is_valid"</span>: <span class="bool">true</span>,
+  <span class="key">"address"</span>: <span class="str">"Burg. Stramanweg 122, Amsterdam"</span>,
+  <span class="key">"country_code"</span>: <span class="str">"NL"</span>
+}</pre></div>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="wrap stats-grid">
+    <div class="stat"><div class="num">99.9%</div><div class="label">uptime</div></div>
+    <div class="stat"><div class="num">&lt;200ms</div><div class="label">response</div></div>
+    <div class="stat"><div class="num">28</div><div class="label">EU countries</div></div>
+    <div class="stat"><div class="num">24h</div><div class="label">cache</div></div>
+  </div>
+</div>
+
+<section id="docs">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>How it works</h2>
+      <p>Three steps from sign-up to validated VAT numbers.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon"><span class="step-num">1</span>
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 11-12 0 6 6 0 0112 0zM3 21l6.75-6.75"/></svg>
+        </div>
+        <h3>Generate an API key</h3>
+        <p>Sign up and create a key in seconds. No credit card needed for the free tier.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon"><span class="step-num">2</span>
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.77 59.77 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+        </div>
+        <h3>Send a request</h3>
+        <p>POST a VAT number to /v1/validate with your bearer token from any language.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon"><span class="step-num">3</span>
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3>Get instant results</h3>
+        <p>Receive clean JSON with validity, trade name and address — served from cache in milliseconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Everything you need to validate VAT</h2>
+      <p>Built for developers who need reliability, speed and a clean audit trail.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg></div>
+        <h3>24-hour cache</h3>
+        <p>Validated results are cached for 24 hours, so repeat lookups return instantly and survive VIES outages.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <h3>Fast response</h3>
+        <p>Cached responses in under 200ms from edge locations across Europe. No more VIES route-trips.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+        <h3>Audit log</h3>
+        <p>Every validation is logged with timestamp and result — perfect for compliance and reverse-charge evidence.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+        <h3>Bulk validation</h3>
+        <p>Validate thousands of VAT numbers in a single batch request with automatable rate handling.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></div>
+        <h3>Auth middleware</h3>
+        <p>Drop-in bearer token auth so you can rotate and revoke access keys without downtime.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.5a3 3 0 003 3h0a3 3 0 003-3v-1.5M4.5 9.75a7.5 7.5 0 1115 0c0 4.142-2 5.25-2 7.5H6.5c0-2.25-2-3.358-2-7.5z"/></svg></div>
+        <h3>Monthly quota</h3>
+        <p>Clean, predictable quotas with usage dashboards and alerts before you ever hit a limit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="usage-grid">
+      <div class="usage-left">
+        <h2>Always know where you stand</h2>
+        <p>Every API key comes with a live usage endpoint. Check how many requests you've used, your monthly limit, and your current plan — all in one call. Perfect for building internal dashboards or alerting before hitting a quota.</p>
+        <div class="usage-pills">
+          <span class="usage-pill">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            Live usage stats
+          </span>
+          <span class="usage-pill">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5"/></svg>
+            Resets monthly
+          </span>
+          <span class="usage-pill">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Per-key tracking
+          </span>
+        </div>
+      </div>
+      <div class="usage-terminal">
+        <div class="terminal-bar">
+          <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+          <span class="terminal-title">vatify - request</span>
+        </div>
+        <div class="usage-meter">
+          <div>
+            <div class="meter-label">
+              <span class="ml">Requests used this month</span>
+              <span class="mr">4,271 / 10,000</span>
+            </div>
+            <div class="meter-bar" style="margin-top:8px;">
+              <div class="meter-fill" style="width:42.71%"></div>
+            </div>
+            <div class="meter-note" style="margin-top:6px;">Resets in 18 days · Starter plan</div>
+          </div>
+        </div>
+        <div class="usage-response">
+          <div class="endpoint"><span>GET</span> <span class="usage_text">/v1/usage</span> · X-API-Key: ••••••••</div>
+          <pre>{
+  <span class="key">"plan"</span>: <span class="str">"starter"</span>,
+  <span class="key">"requests_used"</span>: <span class="bool">4271</span>,
+  <span class="key">"request_limit"</span>: <span class="bool">10000</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Why not use VIES directly?</h2>
+      <p>The official EU service works — until it doesn't. VATify wraps it so your product never breaks.</p>
+    </div>
+    <div class="compare">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th class="good"><span class="dot">V</span>VATify</th>
+            <th>Raw VIES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Uptime</td>
+            <td class="good"><span class="check">✓</span>99.9% with cached fallback</td>
+            <td class="bad"><span class="cross">✕</span>Frequent outages</td>
+          </tr>
+          <tr>
+            <td class="row-label">Response format</td>
+            <td class="good"><span class="check">✓</span>Clean, typed JSON</td>
+            <td class="bad"><span class="cross">✕</span>Raw SOAP / XML</td>
+          </tr>
+          <tr>
+            <td class="row-label">Response time</td>
+            <td class="good"><span class="check">✓</span>&lt;200ms cached</td>
+            <td class="bad"><span class="cross">✕</span>1–5s, often timeouts</td>
+          </tr>
+          <tr>
+            <td class="row-label">Bulk support</td>
+            <td class="good"><span class="check">✓</span>Batch endpoint</td>
+            <td class="bad"><span class="cross">✕</span>One request at a time</td>
+          </tr>
+          <tr>
+            <td class="row-label">Audit log</td>
+            <td class="good"><span class="check">✓</span>Built in</td>
+            <td class="bad"><span class="cross">✕</span>None</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Simple, predictable pricing</h2>
+      <p>Start free and scale as you grow. No overage surprises — every plan includes cached VIES fallback.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amount">€0<span>/month</span></div>
+        <div class="price-sub">500 requests / month</div>
+        <ul class="price-features">
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>500 validations / month</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Cached VIES responses</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Community support</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>1 API key</li>
+        </ul>
+        <a href="#cta" class="price-btn">Start free</a>
+      </div>
+
+      <div class="price-card featured">
+        <span class="price-tag">Most popular</span>
+        <div class="price-name">Starter</div>
+        <div class="price-amount">€15<span>/month</span></div>
+        <div class="price-sub">10,000 requests / month</div>
+        <ul class="price-features">
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>10,000 validations / month</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Automatic VIES fallback</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Email support</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>5 API keys</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>99.9% uptime SLA</li>
+        </ul>
+        <a href="#cta" class="price-btn">Choose Starter</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-name">Pro</div>
+        <div class="price-amount">€39<span>/month</span></div>
+        <div class="price-sub">100,000 requests / month</div>
+        <ul class="price-features">
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>100,000 validations / month</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Priority VIES fallback</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Priority support</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Unlimited API keys</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>99.99% uptime SLA</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Webhooks & bulk lookups</li>
+        </ul>
+        <a href="#cta" class="price-btn">Choose Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cta">
+  <div class="wrap">
+    <div class="cta-panel">
+      <h2>Generate your API key</h2>
+      <p>Create a key in seconds and start validating EU VAT numbers. No credit card required for the free tier.</p>
+      <form id="keyForm" onsubmit="generateKey(event)">
+        <div class="field">
+          <label for="email">Work email</label>
+          <input id="email" type="email" placeholder="you@company.com" required>
+        </div>
+        <div class="field">
+          <label for="plan">Plan</label>
+          <select id="plan">
+            <option value="free">Free — €0 / 500 requests</option>
+            <option value="starter">Starter — €15 / 10,000 requests</option>
+            <option value="pro">Pro — €49 / 100,000 requests</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" id="submitBtn">Generate API key</button>
+        <div id="keyResult" style="display:none; margin-top:16px; padding:14px; background:var(--bg-soft); border:1px solid var(--green-line); border-radius:8px; text-align:left;">
+          <div style="font-size:12px; color:var(--green); margin-bottom:6px;">Your API key — save it now, it won't be shown again</div>
+          <code id="keyValue" style="font-family:var(--mono); font-size:12px; color:var(--text); word-break:break-all;"></code>
+        </div>
+        <div id="keyError" style="display:none; margin-top:12px; font-size:13px; color:var(--red);"></div>
+      </form>
+      <script>
+        const API = 'https://vatify-production.up.railway.app';
+
+        async function generateKey(e) {
+          e.preventDefault();
+          const btn = document.getElementById('submitBtn');
+          const result = document.getElementById('keyResult');
+          const error = document.getElementById('keyError');
+          const keyValue = document.getElementById('keyValue');
+          const email = document.getElementById('email').value.trim();
+          const plan = document.getElementById('plan').value;
+
+          result.style.display = 'none';
+          error.style.display = 'none';
+          btn.textContent = 'Generating...';
+          btn.disabled = true;
+
+          try {
+            if (plan === 'free') {
+              const res = await fetch(API + '/v1/keys', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, plan: 'free' })
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                error.textContent = data.Error || 'Something went wrong. Please try again.';
+                error.style.display = 'block';
+              } else {
+                keyValue.textContent = data.api_key;
+                result.style.display = 'block';
+              }
+            } else {
+              // Register email first
+              const keyRes = await fetch(API + '/v1/keys', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, plan: 'free' })
+              });
+              const keyData = await keyRes.json();
+              const alreadyExists = keyData.Error && keyData.Error.toLowerCase().includes('already exists');
+              if (!keyRes.ok && !alreadyExists) {
+                error.textContent = keyData.Error || 'Something went wrong. Please try again.';
+                error.style.display = 'block';
+                btn.textContent = 'Generate API key';
+                btn.disabled = false;
+                return;
+              }
+              // Redirect to Stripe
+              const checkoutRes = await fetch(API + '/v1/checkout/sessions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  plan,
+                  success_url: window.location.origin + window.location.pathname + '?upgraded=1',
+                  cancel_url: window.location.origin + window.location.pathname
+                })
+              });
+              const checkoutData = await checkoutRes.json();
+              if (!checkoutRes.ok || !checkoutData.checkout_url) {
+                error.textContent = 'Failed to start checkout. Please try again.';
+                error.style.display = 'block';
+              } else {
+                window.location.href = checkoutData.checkout_url;
+                return;
+              }
+            }
+          } catch(err) {
+            error.textContent = 'Network error. Please check your connection and try again.';
+            error.style.display = 'block';
+          }
+
+          btn.textContent = 'Generate API key';
+          btn.disabled = false;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+          if (window.location.search.includes('upgraded=1')) {
+            const result = document.getElementById('keyResult');
+            const keyValue = document.getElementById('keyValue');
+            keyValue.textContent = 'Payment successful! Your plan has been upgraded. Use the same API key you received when registering.';
+            result.style.display = 'block';
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        });
+      </script>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <div class="footer-brand"><span class="dot">V</span> VATify</div>
+    <div class="footer-links">
+      <a href="#docs">Docs</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#cta">Get API key</a>
+    </div>
+    <div class="footer-note">© 2026 VATify. Not affiliated with the European Commission.</div>
+  </div>
+</footer>
+
+</body>
+</html>
