@@ -32,28 +32,28 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 		price_id := ""
 
 		if plan == "starter" {
-    		price_id = env.StarterPriceId
+			price_id = env.StarterPriceId
 		} else if plan == "pro" {
-    		price_id = env.ProPriceId
+			price_id = env.ProPriceId
 		} else {
-    		return c.JSON(http.StatusBadRequest, map[string]string{
-        		"Error": "Invalid plan",
-    		})
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"Error": "Invalid plan",
+			})
 		}
 
 		fmt.Println("price id: ", price_id, len(price_id))
 
 		sc := stripe.NewClient(env.StripeSecretKey)
 		params := &stripe.CheckoutSessionCreateParams{
-  			SuccessURL: stripe.String("http://localhost:8080/success"),
-			CancelURL: stripe.String("http://localhost:8080/cancel"),
-  			LineItems: []*stripe.CheckoutSessionCreateLineItemParams{
-    			{
-      				Price: stripe.String(string(price_id)),
-      				Quantity: stripe.Int64(1),
-    			},
-  			},
-  			Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+			SuccessURL: stripe.String(stripe_request.SuccessURL),
+			CancelURL:  stripe.String(stripe_request.CancelURL),
+			LineItems: []*stripe.CheckoutSessionCreateLineItemParams{
+				{
+					Price:    stripe.String(string(price_id)),
+					Quantity: stripe.Int64(1),
+				},
+			},
+			Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 			Metadata: map[string]string{
 				"plan": plan,
 			},
