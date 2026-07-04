@@ -41,8 +41,6 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			})
 		}
 
-		fmt.Println("price id: ", price_id, len(price_id))
-
 		sc := stripe.NewClient(env.StripeSecretKey)
 		params := &stripe.CheckoutSessionCreateParams{
 			SuccessURL: stripe.String(stripe_request.SuccessURL),
@@ -60,6 +58,8 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 		}
 
 		result, err := sc.V1CheckoutSessions.Create(context.TODO(), params)
+
+		fmt.Println("success_url:", stripe_request.SuccessURL)
 
 		if err != nil {
 			return c.JSON(http.StatusUnauthorized, map[string]string{
