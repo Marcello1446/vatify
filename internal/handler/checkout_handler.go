@@ -43,7 +43,7 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 
 		sc := stripe.NewClient(env.StripeSecretKey)
 		params := &stripe.CheckoutSessionCreateParams{
-			SuccessURL: stripe.String(stripe_request.SuccessURL + "&session_id={CHECKOUT_SESSION_ID}"),
+			SuccessURL: stripe.String(stripe_request.SuccessURL),
 			CancelURL:  stripe.String(stripe_request.CancelURL),
 			LineItems: []*stripe.CheckoutSessionCreateLineItemParams{
 				{

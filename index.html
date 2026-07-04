@@ -836,7 +836,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                   plan,
-                  success_url: window.location.origin + window.location.pathname + '?upgraded=1',
+                  success_url: window.location.origin + '/success',
                   cancel_url: window.location.origin + window.location.pathname
                 })
               });

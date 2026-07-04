@@ -9,5 +9,6 @@ FROM alpine
 WORKDIR /app 
 COPY --from=builder /vatify /vatify
 COPY index.html /app/index.html
+COPY success.html /app/success.html
 EXPOSE 8080
 CMD ["/vatify"]
