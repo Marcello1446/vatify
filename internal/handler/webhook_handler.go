@@ -2,8 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
 	"fmt"
 	"github.com/Marcello1446/vatify/config"
 	"github.com/Marcello1446/vatify/internal/service"
@@ -11,16 +9,15 @@ import (
 	"github.com/stripe/stripe-go/v86"
 	"github.com/stripe/stripe-go/v86/webhook"
 	"gorm.io/gorm"
+	"io"
+	"net/http"
 )
-
-
 
 func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var checkout_session *stripe.CheckoutSession
 
 		raw_body, err := io.ReadAll(c.Request().Body)
-		
 
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
@@ -30,21 +27,19 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 
 		stripe_header := c.Request().Header.Get("Stripe-Signature")
 
-	
 		event, err := webhook.ConstructEventWithOptions(raw_body, stripe_header, env.StripeWebhookSecret, webhook.ConstructEventOptions{
-    		IgnoreAPIVersionMismatch: true,
+			IgnoreAPIVersionMismatch: true,
 		})
 
-    	
 		if err != nil {
 			fmt.Println("verify error:", err)
-        	return c.JSON(http.StatusBadRequest, map[string]string{
+			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Failed to verificate webhook signature",
 			})
-    	}
+		}
 
 		if event.Type != "checkout.session.completed" {
-    		return c.JSON(http.StatusOK, nil)
+			return c.JSON(http.StatusOK, nil)
 		}
 
 		raw_data := event.Data.Raw
@@ -66,6 +61,20 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Failed to upgrade plan",
 			})
+		}
+
+		if checkout_session.Metadata["api_key"] == "existing" {
+			if err := service.SendEmailWithUpgradedAPIKey(env, checkout_session.CustomerDetails.Email, checkout_session.Metadata["request_limit"], checkout_session.Metadata["plan"]); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to send email with updated api key",
+				})
+			}
+		} else {
+			if err := service.SendEmailWithNewAPIKey(env, checkout_session.Metadata["request_limit"], checkout_session.CustomerDetails.Email, checkout_session.Metadata["api_key"], checkout_session.Metadata["plan"]); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to send email with new api key",
+				})
+			}
 		}
 
 		return c.JSON(http.StatusOK, map[string]string{

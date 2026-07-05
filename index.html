@@ -815,7 +815,6 @@ color-mix(in oklab, var(--background) 80%, transparent);
                 result.style.display = 'block';
               }
             } else {
-              // Register email first
               const keyRes = await fetch(API + '/v1/keys', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -830,12 +829,12 @@ color-mix(in oklab, var(--background) 80%, transparent);
                 btn.disabled = false;
                 return;
               }
-              // Redirect to Stripe
               const checkoutRes = await fetch(API + '/v1/checkout/sessions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                   plan,
+                  api_key: alreadyExists ? "existing" : keyData.api_key,
                   success_url: window.location.origin + '/success',
                   cancel_url: window.location.origin + window.location.pathname
                 })

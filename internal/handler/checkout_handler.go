@@ -2,16 +2,15 @@ package handler
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-
 	"github.com/Marcello1446/vatify/config"
 	"github.com/labstack/echo/v5"
 	"github.com/stripe/stripe-go/v86"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type StripeRequest struct {
+	APIKey     string `json:"api_key"`
 	Plan       string `json:"plan"`
 	SuccessURL string `json:"success_url"`
 	CancelURL  string `json:"cancel_url"`
@@ -30,6 +29,7 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 		plan := stripe_request.Plan
 
 		price_id := ""
+		request_limit := ""
 
 		if plan == "starter" {
 			price_id = env.StarterPriceId
@@ -39,6 +39,12 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Invalid plan",
 			})
+		}
+
+		if plan == "starter" {
+			request_limit = "10,000"
+		} else if plan == "pro" {
+			request_limit = "100,000"
 		}
 
 		sc := stripe.NewClient(env.StripeSecretKey)
@@ -53,13 +59,13 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			},
 			Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 			Metadata: map[string]string{
-				"plan": plan,
+				"plan":          plan,
+				"request_limit": request_limit,
+				"api_key":       stripe_request.APIKey,
 			},
 		}
 
 		result, err := sc.V1CheckoutSessions.Create(context.TODO(), params)
-
-		fmt.Println("success_url:", stripe_request.SuccessURL)
 
 		if err != nil {
 			return c.JSON(http.StatusUnauthorized, map[string]string{
