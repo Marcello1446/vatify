@@ -7,9 +7,165 @@ import (
 )
 
 func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, plan string) error {
-	fmt.Println(request_limit, email, full_api_key, plan)
+	fmt.Println("New API Key email:", request_limit, email, plan)
+
 	client := resend.NewClient(env.ResendApiKey)
-	htmlBody := fmt.Sprintf("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Your VATify API Key</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#0f172a; padding:40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:600px; width:100%;\">\n\n          <!-- Header -->\n          <tr>\n            <td style=\"padding-bottom:32px;\" align=\"center\">\n              <table cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td style=\"background-color:#22c55e; width:8px; height:8px; border-radius:50%; vertical-align:middle;\"></td>\n                  <td style=\"padding-left:8px; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.01em; vertical-align:middle;\">VATify</td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Main card -->\n          <tr>\n            <td style=\"background-color:#1e293b; border:1px solid #2d3748; border-radius:16px; padding:40px 36px;\">\n\n              <!-- Icon -->\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td align=\"center\" style=\"padding-bottom:24px;\">\n                    <div style=\"display:inline-block; background-color:#052e16; border:1px solid #166534; border-radius:12px; padding:16px;\">\n                      <svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n                        <path d=\"M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" stroke=\"#22c55e\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n                      </svg>\n                    </div>\n                  </td>\n                </tr>\n\n                <!-- Title -->\n                <tr>\n                  <td align=\"center\" style=\"padding-bottom:8px;\">\n                    <h1 style=\"margin:0; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:-0.01em;\">Your API key is ready</h1>\n                  </td>\n                </tr>\n\n                <!-- Subtitle -->\n                <tr>\n                  <td align=\"center\" style=\"padding-bottom:32px;\">\n                    <p style=\"margin:0; color:#94a3b8; font-size:15px; line-height:1.6;\">You're all set to start validating EU VAT numbers.</p>\n                  </td>\n                </tr>\n\n                <!-- API Key box -->\n                <tr>\n                  <td style=\"padding-bottom:8px;\">\n                    <p style=\"margin:0 0 8px 0; color:#64748b; font-size:12px; text-transform:uppercase; letter-spacing:0.08em;\">Your API Key</p>\n                    <div style=\"background-color:#0f172a; border:1px solid #22c55e; border-radius:10px; padding:16px 20px;\">\n                      <p style=\"margin:0; color:#22c55e; font-family:'Courier New', Courier, monospace; font-size:13px; word-break:break-all; letter-spacing:0.02em;\">%s</p>\n                    </div>\n                  </td>\n                </tr>\n\n                <!-- Warning -->\n                <tr>\n                  <td style=\"padding-bottom:32px;\">\n                    <p style=\"margin:0; color:#f59e0b; font-size:12px;\">⚠️ Save this key — it won't be shown again for security reasons.</p>\n                  </td>\n                </tr>\n\n                <!-- Plan info -->\n                <tr>\n                  <td style=\"padding-bottom:32px;\">\n                    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#0f172a; border:1px solid #2d3748; border-radius:10px;\">\n                      <tr>\n                        <td style=\"padding:16px 20px; border-bottom:1px solid #2d3748;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">Plan</td>\n                              <td align=\"right\" style=\"color:#ffffff; font-size:13px; font-weight:600;\">%s</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:16px 20px; border-bottom:1px solid #2d3748;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">Monthly requests</td>\n                              <td align=\"right\" style=\"color:#ffffff; font-size:13px; font-weight:600;\">%s</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:16px 20px;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">Resets</td>\n                              <td align=\"right\" style=\"color:#ffffff; font-size:13px; font-weight:600;\">Monthly</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n\n                <!-- Quick start -->\n                <tr>\n                  <td style=\"padding-bottom:12px;\">\n                    <p style=\"margin:0 0 12px 0; color:#ffffff; font-size:14px; font-weight:600;\">Quick start</p>\n                    <div style=\"background-color:#0f172a; border:1px solid #2d3748; border-radius:10px; padding:16px 20px;\">\n                      <p style=\"margin:0; color:#64748b; font-family:'Courier New', Courier, monospace; font-size:12px; line-height:1.8;\">\n                        <span style=\"color:#94a3b8;\">POST</span> <span style=\"color:#22c55e;\">/v1/validate</span><br>\n                        <span style=\"color:#64748b;\">X-API-Key: </span><span style=\"color:#22c55e;\">%s</span><br><br>\n                        <span style=\"color:#2d3748;\">{</span><br>\n                        &nbsp;&nbsp;<span style=\"color:#7dd3fc;\">\"vat\"</span>: <span style=\"color:#fde68a;\">\"LV50203019841\"</span>,<br>\n                        &nbsp;&nbsp;<span style=\"color:#7dd3fc;\">\"country_code\"</span>: <span style=\"color:#fde68a;\">\"LV\"</span><br>\n                        <span style=\"color:#2d3748;\">}</span>\n                      </p>\n                    </div>\n                  </td>\n                </tr>\n\n                <!-- CTA button -->\n                <tr>\n                  <td align=\"center\" style=\"padding-top:24px;\">\n                    <a href=\"https://vatify-production.up.railway.app/swagger/index.html\" style=\"display:inline-block; background-color:#22c55e; color:#000000; font-size:14px; font-weight:600; padding:12px 28px; border-radius:8px; text-decoration:none;\">View API docs</a>\n                  </td>\n                </tr>\n\n              </table>\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"padding-top:32px;\" align=\"center\">\n              <p style=\"margin:0; color:#475569; font-size:12px; line-height:1.7;\">\n                You're receiving this because you signed up at <a href=\"https://vatify-production.up.railway.app\" style=\"color:#22c55e; text-decoration:none;\">vatify-production.up.railway.app</a><br>\n                © 2026 VATify · Not affiliated with the European Commission\n              </p>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>\n", full_api_key, plan, request_limit, full_api_key[:8]+"••••••••")
+
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your VATify API Key</title>
+</head>
+<body style="margin:0; padding:0; background-color:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f172a; padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding-bottom:32px;" align="center">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color:#22c55e; width:8px; height:8px; border-radius:50%; vertical-align:middle;"></td>
+                  <td style="padding-left:8px; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.01em; vertical-align:middle;">VATify</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main card -->
+          <tr>
+            <td style="background-color:#1e293b; border:1px solid #2d3748; border-radius:16px; padding:40px 36px;">
+
+              <!-- Icon -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <div style="display:inline-block; background-color:#052e16; border:1px solid #166534; border-radius:12px; padding:16px;">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Title -->
+                <tr>
+                  <td align="center" style="padding-bottom:8px;">
+                    <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:-0.01em;">Your API key is ready</h1>
+                  </td>
+                </tr>
+
+                <!-- Subtitle -->
+                <tr>
+                  <td align="center" style="padding-bottom:32px;">
+                    <p style="margin:0; color:#94a3b8; font-size:15px; line-height:1.6;">You're all set to start validating EU VAT numbers.</p>
+                  </td>
+                </tr>
+
+                <!-- API Key box -->
+                <tr>
+                  <td style="padding-bottom:8px;">
+                    <p style="margin:0 0 8px 0; color:#64748b; font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">Your API Key</p>
+                    <div style="background-color:#0f172a; border:1px solid #22c55e; border-radius:10px; padding:16px 20px;">
+                      <p style="margin:0; color:#22c55e; font-family:'Courier New', Courier, monospace; font-size:13px; word-break:break-all; letter-spacing:0.02em;">%s</p>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Warning -->
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <p style="margin:0; color:#f59e0b; font-size:12px;">⚠️ Save this key — it won't be shown again for security reasons.</p>
+                  </td>
+                </tr>
+
+                <!-- Plan info -->
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f172a; border:1px solid #2d3748; border-radius:10px;">
+                      <tr>
+                        <td style="padding:16px 20px; border-bottom:1px solid #2d3748;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">Plan</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">%s</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:16px 20px; border-bottom:1px solid #2d3748;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">Monthly requests</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">%s</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:16px 20px;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">Resets</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">Monthly</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Quick start -->
+                <tr>
+                  <td style="padding-bottom:12px;">
+                    <p style="margin:0 0 12px 0; color:#ffffff; font-size:14px; font-weight:600;">Quick start</p>
+                    <div style="background-color:#0f172a; border:1px solid #2d3748; border-radius:10px; padding:16px 20px;">
+                      <p style="margin:0; color:#64748b; font-family:'Courier New', Courier, monospace; font-size:12px; line-height:1.8;">
+                        <span style="color:#94a3b8;">POST</span> <span style="color:#22c55e;">/v1/validate</span><br>
+                        <span style="color:#64748b;">X-API-Key: </span><span style="color:#22c55e;">%s</span><br><br>
+                        <span style="color:#2d3748;">{</span><br>
+                        &nbsp;&nbsp;<span style="color:#7dd3fc;">"vat"</span>: <span style="color:#fde68a;">"LV50203019841"</span>,<br>
+                        &nbsp;&nbsp;<span style="color:#7dd3fc;">"country_code"</span>: <span style="color:#fde68a;">"LV"</span><br>
+                        <span style="color:#2d3748;">}</span>
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- CTA button -->
+                <tr>
+                  <td align="center" style="padding-top:24px;">
+                    <a href="https://vatify-production.up.railway.app/swagger/index.html" style="display:inline-block; background-color:#22c55e; color:#000000; font-size:14px; font-weight:600; padding:12px 28px; border-radius:8px; text-decoration:none;">View API docs</a>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top:32px;" align="center">
+              <p style="margin:0; color:#475569; font-size:12px; line-height:1.7;">
+                You're receiving this because you signed up at <a href="https://vatify-production.up.railway.app" style="color:#22c55e; text-decoration:none;">vatify-production.up.railway.app</a><br>
+                © 2026 VATify · Not affiliated with the European Commission
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`, full_api_key, plan, request_limit, full_api_key[:8]+"••••••••")
+
 	params := &resend.SendEmailRequest{
 		From:    "onboarding@resend.dev",
 		To:      []string{email},
@@ -21,18 +177,168 @@ func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, 
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit string, plan string) error {
-	fmt.Println(request_limit, email, plan)
+	fmt.Println("Upgrade email:", request_limit, email, plan)
+
 	client := resend.NewClient(env.ResendApiKey)
-	htmlBody := fmt.Sprintf("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Your VATify Plan Has Been Upgraded</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#0f172a; padding:40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:600px; width:100%;\">\n\n          <!-- Header -->\n          <tr>\n            <td style=\"padding-bottom:32px;\" align=\"center\">\n              <table cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td style=\"background-color:#22c55e; width:8px; height:8px; border-radius:50%; vertical-align:middle;\"></td>\n                  <td style=\"padding-left:8px; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.01em; vertical-align:middle;\">VATify</td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Main card -->\n          <tr>\n            <td style=\"background-color:#1e293b; border:1px solid #2d3748; border-radius:16px; padding:40px 36px;\">\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n\n                <!-- Icon -->\n                <tr>\n                  <td align=\"center\" style=\"padding-bottom:24px;\">\n                    <div style=\"display:inline-block; background-color:#052e16; border:1px solid #166534; border-radius:12px; padding:16px;\">\n                      <svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n                        <path d=\"M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18\" stroke=\"#22c55e\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n                      </svg>\n                    </div>\n                  </td>\n                </tr>\n\n                <!-- Title -->\n                <tr>\n                  <td align=\"center\" style=\"padding-bottom:8px;\">\n                    <h1 style=\"margin:0; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:-0.01em;\">Plan upgraded successfully</h1>\n                  </td>\n                </tr>\n\n                <!-- Subtitle -->\n                <tr>\n                  <td align=\"center\" style=\"padding-bottom:32px;\">\n                    <p style=\"margin:0; color:#94a3b8; font-size:15px; line-height:1.6;\">Your VATify plan has been upgraded. Your existing API key still works — no changes needed in your code.</p>\n                  </td>\n                </tr>\n\n                <!-- Info box -->\n                <tr>\n                  <td style=\"padding-bottom:32px;\">\n                    <div style=\"background-color:#0f172a; border:1px solid #22c55e; border-radius:10px; padding:20px 24px;\">\n                      <p style=\"margin:0 0 6px 0; color:#64748b; font-size:12px; text-transform:uppercase; letter-spacing:0.08em;\">What changed</p>\n                      <p style=\"margin:0; color:#ffffff; font-size:15px; line-height:1.7;\">Your monthly request limit has been increased to <strong style=\"color:#22c55e;\">%s requests</strong> on the <strong style=\"color:#22c55e;\">%s plan</strong>. Everything else stays the same — same API key, same endpoint.</p>\n                    </div>\n                  </td>\n                </tr>\n\n                <!-- Plan info table -->\n                <tr>\n                  <td style=\"padding-bottom:32px;\">\n                    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#0f172a; border:1px solid #2d3748; border-radius:10px;\">\n                      <tr>\n                        <td style=\"padding:16px 20px; border-bottom:1px solid #2d3748;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">New plan</td>\n                              <td align=\"right\" style=\"color:#22c55e; font-size:13px; font-weight:600;\">%s</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:16px 20px; border-bottom:1px solid #2d3748;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">Monthly requests</td>\n                              <td align=\"right\" style=\"color:#ffffff; font-size:13px; font-weight:600;\">%s</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:16px 20px; border-bottom:1px solid #2d3748;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">API key</td>\n                              <td align=\"right\" style=\"color:#ffffff; font-size:13px; font-weight:600;\">Unchanged</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"padding:16px 20px;\">\n                          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                            <tr>\n                              <td style=\"color:#64748b; font-size:13px;\">Resets</td>\n                              <td align=\"right\" style=\"color:#ffffff; font-size:13px; font-weight:600;\">Monthly from today</td>\n                            </tr>\n                          </table>\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n\n                <!-- Notice -->\n                <tr>\n                  <td style=\"padding-bottom:32px;\">\n                    <div style=\"background-color:#1c1917; border:1px solid #44403c; border-radius:10px; padding:16px 20px;\">\n                      <p style=\"margin:0; color:#a8a29e; font-size:13px; line-height:1.7;\">💡 Your API key is the same one you received when you first signed up. If you've lost it, contact us and we'll help you rotate it.</p>\n                    </div>\n                  </td>\n                </tr>\n\n                <!-- CTA button -->\n                <tr>\n                  <td align=\"center\">\n                    <a href=\"https://vatify-production.up.railway.app/swagger/index.html\" style=\"display:inline-block; background-color:#22c55e; color:#000000; font-size:14px; font-weight:600; padding:12px 28px; border-radius:8px; text-decoration:none;\">View API docs</a>\n                  </td>\n                </tr>\n\n              </table>\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"padding-top:32px;\" align=\"center\">\n              <p style=\"margin:0; color:#475569; font-size:12px; line-height:1.7;\">\n                You're receiving this because you upgraded your plan at <a href=\"https://vatify-production.up.railway.app\" style=\"color:#22c55e; text-decoration:none;\">vatify-production.up.railway.app</a><br>\n                © 2026 VATify · Not affiliated with the European Commission\n              </p>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>\n", request_limit, plan, plan, request_limit)
+
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your VATify Plan Has Been Upgraded</title>
+</head>
+<body style="margin:0; padding:0; background-color:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f172a; padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding-bottom:32px;" align="center">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color:#22c55e; width:8px; height:8px; border-radius:50%; vertical-align:middle;"></td>
+                  <td style="padding-left:8px; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.01em; vertical-align:middle;">VATify</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main card -->
+          <tr>
+            <td style="background-color:#1e293b; border:1px solid #2d3748; border-radius:16px; padding:40px 36px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+
+                <!-- Icon -->
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <div style="display:inline-block; background-color:#052e16; border:1px solid #166534; border-radius:12px; padding:16px;">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Title -->
+                <tr>
+                  <td align="center" style="padding-bottom:8px;">
+                    <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:-0.01em;">Plan upgraded successfully</h1>
+                  </td>
+                </tr>
+
+                <!-- Subtitle -->
+                <tr>
+                  <td align="center" style="padding-bottom:32px;">
+                    <p style="margin:0; color:#94a3b8; font-size:15px; line-height:1.6;">Your VATify plan has been upgraded. Your existing API key still works — no changes needed in your code.</p>
+                  </td>
+                </tr>
+
+                <!-- Info box -->
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <div style="background-color:#0f172a; border:1px solid #22c55e; border-radius:10px; padding:20px 24px;">
+                      <p style="margin:0 0 6px 0; color:#64748b; font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">What changed</p>
+                      <p style="margin:0; color:#ffffff; font-size:15px; line-height:1.7;">Your monthly request limit has been increased to <strong style="color:#22c55e;">%s requests</strong> on the <strong style="color:#22c55e;">%s plan</strong>. Everything else stays the same — same API key, same endpoint.</p>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Plan info table -->
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f172a; border:1px solid #2d3748; border-radius:10px;">
+                      <tr>
+                        <td style="padding:16px 20px; border-bottom:1px solid #2d3748;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">New plan</td>
+                              <td align="right" style="color:#22c55e; font-size:13px; font-weight:600;">%s</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:16px 20px; border-bottom:1px solid #2d3748;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">Monthly requests</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">%s</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:16px 20px; border-bottom:1px solid #2d3748;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">API key</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">Unchanged</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:16px 20px;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="color:#64748b; font-size:13px;">Resets</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">Monthly from today</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Notice -->
+                <tr>
+                  <td style="padding-bottom:32px;">
+                    <div style="background-color:#1c1917; border:1px solid #44403c; border-radius:10px; padding:16px 20px;">
+                      <p style="margin:0; color:#a8a29e; font-size:13px; line-height:1.7;">💡 Your API key is the same one you received when you first signed up. If you've lost it, contact us and we'll help you rotate it.</p>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- CTA button -->
+                <tr>
+                  <td align="center">
+                    <a href="https://vatify-production.up.railway.app/swagger/index.html" style="display:inline-block; background-color:#22c55e; color:#000000; font-size:14px; font-weight:600; padding:12px 28px; border-radius:8px; text-decoration:none;">View API docs</a>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top:32px;" align="center">
+              <p style="margin:0; color:#475569; font-size:12px; line-height:1.7;">
+                You're receiving this because you upgraded your plan at <a href="https://vatify-production.up.railway.app" style="color:#22c55e; text-decoration:none;">vatify-production.up.railway.app</a><br>
+                © 2026 VATify · Not affiliated with the European Commission
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`, request_limit, plan, plan, request_limit)
+
 	params := &resend.SendEmailRequest{
 		From:    "onboarding@resend.dev",
 		To:      []string{email},
-		Subject: "Your API Key is ready, developer!",
+		Subject: "Your VATify plan has been upgraded!",
 		Html:    htmlBody,
 	}
 
@@ -40,6 +346,5 @@ func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit str
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
