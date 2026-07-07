@@ -1,17 +1,15 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
+	"text/template"
+
 	"github.com/Marcello1446/vatify/config"
 	"github.com/resend/resend-go/v2"
 )
 
-func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, plan string) error {
-	fmt.Println("New API Key email:", request_limit, email, plan)
-
-	client := resend.NewClient(env.ResendApiKey)
-
-	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+const newAPIKeyEmailTmpl = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -71,7 +69,7 @@ func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, 
                   <td style="padding-bottom:8px;">
                     <p style="margin:0 0 8px 0; color:#64748b; font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">Your API Key</p>
                     <div style="background-color:#0f172a; border:1px solid #22c55e; border-radius:10px; padding:16px 20px;">
-                      <p style="margin:0; color:#22c55e; font-family:'Courier New', Courier, monospace; font-size:13px; word-break:break-all; letter-spacing:0.02em;">%s</p>
+                      <p style="margin:0; color:#22c55e; font-family:'Courier New', Courier, monospace; font-size:13px; word-break:break-all; letter-spacing:0.02em;">{{.APIKey}}</p>
                     </div>
                   </td>
                 </tr>
@@ -92,7 +90,7 @@ func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, 
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:#64748b; font-size:13px;">Plan</td>
-                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">%s</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">{{.Plan}}</td>
                             </tr>
                           </table>
                         </td>
@@ -102,7 +100,7 @@ func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, 
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:#64748b; font-size:13px;">Monthly requests</td>
-                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">%s</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">{{.RequestLimit}}</td>
                             </tr>
                           </table>
                         </td>
@@ -128,7 +126,7 @@ func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, 
                     <div style="background-color:#0f172a; border:1px solid #2d3748; border-radius:10px; padding:16px 20px;">
                       <p style="margin:0; color:#64748b; font-family:'Courier New', Courier, monospace; font-size:12px; line-height:1.8;">
                         <span style="color:#94a3b8;">POST</span> <span style="color:#22c55e;">/v1/validate</span><br>
-                        <span style="color:#64748b;">X-API-Key: </span><span style="color:#22c55e;">%s</span><br><br>
+                        <span style="color:#64748b;">X-API-Key: </span><span style="color:#22c55e;">{{.MaskedKey}}</span><br><br>
                         <span style="color:#2d3748;">{</span><br>
                         &nbsp;&nbsp;<span style="color:#7dd3fc;">"vat"</span>: <span style="color:#fde68a;">"LV50203019841"</span>,<br>
                         &nbsp;&nbsp;<span style="color:#7dd3fc;">"country_code"</span>: <span style="color:#fde68a;">"LV"</span><br>
@@ -164,28 +162,9 @@ func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, 
     </tr>
   </table>
 </body>
-</html>`, full_api_key, plan, request_limit, full_api_key[:8]+"••••••••")
+</html>`
 
-	params := &resend.SendEmailRequest{
-		From:    "onboarding@resend.dev",
-		To:      []string{email},
-		Subject: "Your API Key is ready, developer!",
-		Html:    htmlBody,
-	}
-
-	_, err := client.Emails.Send(params)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit string, plan string) error {
-	fmt.Println("Upgrade email:", request_limit, email, plan)
-
-	client := resend.NewClient(env.ResendApiKey)
-
-	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+const upgradedAPIKeyEmailTmpl = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -245,7 +224,7 @@ func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit str
                   <td style="padding-bottom:32px;">
                     <div style="background-color:#0f172a; border:1px solid #22c55e; border-radius:10px; padding:20px 24px;">
                       <p style="margin:0 0 6px 0; color:#64748b; font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">What changed</p>
-                      <p style="margin:0; color:#ffffff; font-size:15px; line-height:1.7;">Your monthly request limit has been increased to <strong style="color:#22c55e;">%s requests</strong> on the <strong style="color:#22c55e;">%s plan</strong>. Everything else stays the same — same API key, same endpoint.</p>
+                      <p style="margin:0; color:#ffffff; font-size:15px; line-height:1.7;">Your monthly request limit has been increased to <strong style="color:#22c55e;">{{.RequestLimit}} requests</strong> on the <strong style="color:#22c55e;">{{.Plan}} plan</strong>. Everything else stays the same — same API key, same endpoint.</p>
                     </div>
                   </td>
                 </tr>
@@ -259,7 +238,7 @@ func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit str
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:#64748b; font-size:13px;">New plan</td>
-                              <td align="right" style="color:#22c55e; font-size:13px; font-weight:600;">%s</td>
+                              <td align="right" style="color:#22c55e; font-size:13px; font-weight:600;">{{.Plan}}</td>
                             </tr>
                           </table>
                         </td>
@@ -269,7 +248,7 @@ func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit str
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                               <td style="color:#64748b; font-size:13px;">Monthly requests</td>
-                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">%s</td>
+                              <td align="right" style="color:#ffffff; font-size:13px; font-weight:600;">{{.RequestLimit}}</td>
                             </tr>
                           </table>
                         </td>
@@ -333,16 +312,79 @@ func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit str
     </tr>
   </table>
 </body>
-</html>`, request_limit, plan, plan, request_limit)
+</html>`
+
+// Parsed once at package init so a malformed template panics on startup,
+// not on the first email send.
+var (
+	newAPIKeyEmail      = template.Must(template.New("newAPIKey").Parse(newAPIKeyEmailTmpl))
+	upgradedAPIKeyEmail = template.Must(template.New("upgradedAPIKey").Parse(upgradedAPIKeyEmailTmpl))
+)
+
+type newAPIKeyEmailData struct {
+	APIKey       string
+	Plan         string
+	RequestLimit string
+	MaskedKey    string
+}
+
+type upgradedAPIKeyEmailData struct {
+	Plan         string
+	RequestLimit string
+}
+
+func SendEmailWithNewAPIKey(env config.Env, request_limit, email, full_api_key, plan string) error {
+	fmt.Println("New API Key email:", request_limit, email, plan)
+
+	client := resend.NewClient(env.ResendApiKey)
+
+	var buf bytes.Buffer
+	err := newAPIKeyEmail.Execute(&buf, newAPIKeyEmailData{
+		APIKey:       full_api_key,
+		Plan:         plan,
+		RequestLimit: request_limit,
+		MaskedKey:    full_api_key[:8] + "••••••••",
+	})
+	if err != nil {
+		return err
+	}
+
+	params := &resend.SendEmailRequest{
+		From:    "onboarding@resend.dev",
+		To:      []string{email},
+		Subject: "Your API Key is ready, developer!",
+		Html:    buf.String(),
+	}
+
+	_, err = client.Emails.Send(params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func SendEmailWithUpgradedAPIKey(env config.Env, email string, request_limit string, plan string) error {
+	fmt.Println("Upgrade email:", request_limit, email, plan)
+
+	client := resend.NewClient(env.ResendApiKey)
+
+	var buf bytes.Buffer
+	err := upgradedAPIKeyEmail.Execute(&buf, upgradedAPIKeyEmailData{
+		Plan:         plan,
+		RequestLimit: request_limit,
+	})
+	if err != nil {
+		return err
+	}
 
 	params := &resend.SendEmailRequest{
 		From:    "onboarding@resend.dev",
 		To:      []string{email},
 		Subject: "Your VATify plan has been upgraded!",
-		Html:    htmlBody,
+		Html:    buf.String(),
 	}
 
-	_, err := client.Emails.Send(params)
+	_, err = client.Emails.Send(params)
 	if err != nil {
 		return err
 	}
