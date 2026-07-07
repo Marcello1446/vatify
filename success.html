@@ -1,14 +1,316 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VATify — Check your email</title>
     <link rel="shortcut icon" href="./icon.png" type="image/x-icon">
-    <title>Document</title>
+    <style>
+        :root{
+            --bg: #0f172a;
+            --bg-soft: #131f38;
+            --panel: #1e293b;
+            --panel-border: #334155;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --text-faint: #64748b;
+            --green: #22c55e;
+            --green-dark: #052e16;
+            --blue: #38bdf8;
+            --green-soft: rgba(34,197,94,0.12);
+            --green-line: rgba(34,197,94,0.35);
+            --red: #f87171;
+            --mono: 'Geist Fallback', 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+            --sans: 'Geist Fallback', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+        }
+
+        *{box-sizing:border-box; margin:0; padding:0;}
+        html{scroll-behavior:smooth;}
+        body{
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            line-height:1.5;
+            -webkit-font-smoothing:antialiased;
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+        }
+
+        a{color:inherit; text-decoration:none;}
+        ul{list-style:none;}
+
+        .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+        /* ---------- Header (same as landing) ---------- */
+        header{
+            position:sticky; top:0; z-index:50;
+            background-color: color-mix(in oklab, var(--bg) 80%, transparent);
+            backdrop-filter:blur(10px);
+            border-bottom:1px solid var(--panel-border);
+        }
+        .nav{
+            display:flex; align-items:center; justify-content:space-between;
+            padding:16px 24px;
+        }
+        .brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px;}
+        .brand .dot{
+            width:20px; height:20px; border-radius:6px;
+            background:var(--green); color:#04140d;
+            display:flex; align-items:center; justify-content:center;
+            font-size:12px; font-weight:800;
+        }
+        .nav-links{display:flex; gap:28px; font-size:14px; color:var(--text-dim);}
+        .nav-links a:hover{color:var(--text);}
+        .nav-cta{
+            background:var(--green); color:#04140d; font-weight:600; font-size:14px;
+            padding:9px 16px; border-radius:8px;
+            transition:transform .15s ease, box-shadow .15s ease;
+        }
+        .nav-cta:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(52,211,153,0.25);}
+
+        /* ---------- Main ---------- */
+        main{
+            flex:1;
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:64px 24px;
+            overflow:hidden;
+            isolation:isolate;
+        }
+        .glow-bg{
+            position:absolute; inset:-20% -10%; z-index:-1;
+            background:
+                    radial-gradient(32% 50% at 20% 25%, rgba(34,197,94,0.14), transparent 62%),
+                    radial-gradient(40% 55% at 82% 70%, rgba(56,189,248,0.12), transparent 60%);
+            filter:blur(50px) saturate(120%);
+        }
+
+        .success-panel{
+            max-width:460px;
+            width:100%;
+            background:var(--panel);
+            border:1px solid var(--panel-border);
+            border-radius:16px;
+            padding:40px 36px;
+            text-align:center;
+            opacity:0;
+            transform:translateY(12px);
+            animation: riseIn .6s ease .05s forwards;
+        }
+        @keyframes riseIn{
+            from{opacity:0; transform:translateY(24px);}
+            to{opacity:1; transform:translateY(0);}
+        }
+
+        .badge{
+            display:inline-flex; align-items:center; gap:8px;
+            font-size:12px; color:var(--green);
+            background:var(--green-soft); border:1px solid var(--green-line);
+            padding:6px 12px; border-radius:999px; margin-bottom:20px;
+        }
+        .badge::before{
+            content:''; width:6px; height:6px; border-radius:50%; background:var(--green);
+            box-shadow:0 0 0 3px rgba(52,211,153,0.25);
+        }
+
+        .success-icon{
+            width:56px; height:56px; border-radius:14px; margin:0 auto 22px;
+            background:var(--green-dark); border:1px solid var(--green-line);
+            display:flex; align-items:center; justify-content:center;
+        }
+        .success-icon svg{width:26px; height:26px; stroke:var(--green);}
+
+        .success-panel h1{
+            font-size:24px; font-weight:800; letter-spacing:-0.01em;
+            margin-bottom:10px;
+        }
+        .success-panel p.lead{
+            color:var(--text-dim); font-size:14.5px; line-height:1.7;
+            margin-bottom:28px;
+        }
+        .success-panel p.lead strong{color:var(--text); font-weight:600;}
+
+        /* Reuses the .terminal component from the landing page */
+        .terminal{
+            background:var(--bg-soft); border:1px solid var(--panel-border);
+            border-radius:12px; overflow:hidden;
+            text-align:left;
+            margin-bottom:24px;
+        }
+        .terminal-bar{
+            display:flex; align-items:center; gap:8px;
+            padding:12px 14px; border-bottom:1px solid var(--panel-border);
+            background:rgba(255,255,255,0.015);
+        }
+        .terminal-bar .tdot{width:10px; height:10px; border-radius:50%;}
+        .tdot.r{background:#f87171;} .tdot.y{background:#fbbf24;} .tdot.g{background:#34d399;}
+        .terminal-title{
+            margin-left:8px; font-size:12px; color:var(--text-faint); font-family:var(--mono);
+        }
+        .terminal-status{
+            padding:16px 18px;
+            display:flex; align-items:center; gap:12px;
+        }
+        .pulse-wrap{position:relative; width:16px; height:16px; flex-shrink:0;}
+        .pulse-dot{
+            position:absolute; inset:0; margin:auto;
+            width:8px; height:8px; background:var(--green); border-radius:50%;
+        }
+        .pulse-ring{
+            position:absolute; inset:0;
+            border:1.5px solid var(--green); border-radius:50%;
+            animation: pulse 1.8s ease-out infinite;
+        }
+        @keyframes pulse{
+            0%{transform:scale(0.6); opacity:0.8;}
+            100%{transform:scale(2); opacity:0;}
+        }
+        .terminal-status-text p:first-child{
+            font-size:13px; font-weight:600; color:var(--text);
+        }
+        .terminal-status-text p:last-child{
+            font-size:12px; color:var(--text-faint); margin-top:2px;
+        }
+
+        .checklist{
+            text-align:left;
+            display:flex; flex-direction:column; gap:12px;
+            margin-bottom:28px;
+        }
+        .checklist li{
+            font-size:13.5px; color:var(--text-dim);
+            display:flex; gap:10px; align-items:flex-start;
+        }
+        .checklist li svg{flex-shrink:0; width:15px; height:15px; stroke:var(--green); margin-top:2px;}
+        .checklist li span{flex:1; min-width:0;}
+        .checklist li strong{color:var(--text); font-weight:600;}
+
+        .btn-primary{
+            display:block;
+            background:var(--green); color:#04140d; font-weight:600; font-size:14px;
+            padding:12px 20px; border-radius:9px;
+            transition:transform .15s ease, box-shadow .15s ease;
+            border:none;
+            width:100%;
+        }
+        .btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 22px rgba(52,211,153,0.28);}
+        .btn-primary:focus-visible{outline:2px solid var(--green); outline-offset:3px;}
+
+        .fine-print{
+            margin-top:18px; font-size:12.5px; color:var(--text-faint); line-height:1.6;
+        }
+        .fine-print a{color:var(--text-dim); text-decoration:underline; text-underline-offset:2px;}
+        .fine-print a:hover{color:var(--text);}
+
+        /* ---------- Footer (same as landing) ---------- */
+        footer{
+            border-top:1px solid var(--panel-border);
+            padding:36px 0;
+        }
+        .footer-row{
+            display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+        }
+        .footer-brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px;}
+        .footer-brand .dot{
+            width:18px; height:18px; border-radius:6px; background:var(--green);
+            color:#04140d; display:flex; align-items:center; justify-content:center;
+            font-size:11px; font-weight:800;
+        }
+        .footer-links{display:flex; gap:22px; font-size:13px; color:var(--text-dim);}
+        .footer-links a:hover{color:var(--text);}
+        .footer-note{font-size:12.5px; color:var(--text-faint);}
+
+        @media (max-width:520px){
+            .success-panel{padding:32px 24px;}
+            .footer-row{flex-direction:column; align-items:flex-start;}
+        }
+
+        @media (prefers-reduced-motion: reduce){
+            *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+        }
+    </style>
 </head>
 <body>
-    <div>iam succes page</div>
+
+<header>
+    <div class="nav wrap">
+        <a href="/" class="brand"><span class="dot">V</span> VATify</a>
+        <nav class="nav-links">
+            <a href="https://vatify-production.up.railway.app/swagger/index.html" target="_blank">Docs</a>
+            <a href="/#pricing">Pricing</a>
+        </nav>
+        <a href="/#cta" class="nav-cta">Get API key</a>
+    </div>
+</header>
+
+<main>
+    <div class="glow-bg"></div>
+
+    <div class="success-panel">
+        <span class="badge">Payment confirmed</span>
+
+        <div class="success-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </div>
+
+        <h1>Check your email</h1>
+        <p class="lead">Your payment went through. We're sending your <strong>API key</strong> to your inbox now — it's usually there within a minute.</p>
+
+        <div class="terminal">
+            <div class="terminal-bar">
+                <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+                <span class="terminal-title">vatify — email</span>
+            </div>
+            <div class="terminal-status">
+                <div class="pulse-wrap">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-dot"></div>
+                </div>
+                <div class="terminal-status-text">
+                    <p>Sending your API key</p>
+                    <p>Delivery usually takes under a minute</p>
+                </div>
+            </div>
+        </div>
+
+        <ul class="checklist">
+            <li>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                <span>Open the email from <strong>VATify</strong> — subject starts with "Your API Key"</span>
+            </li>
+            <li>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                <span>Copy your key — it's shown <strong>once</strong>, so save it somewhere safe</span>
+            </li>
+            <li>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                <span>No email after a few minutes? Check your <strong>spam folder</strong> first</span>
+            </li>
+        </ul>
+
+        <a href="https://vatify-production.up.railway.app/swagger/index.html" class="btn-primary">View API docs</a>
+
+        <p class="fine-print">
+            Already have a key and just upgraded? Your existing key still works — nothing to copy.<br>
+            Need help? <a href="mailto:support@vatify-production.up.railway.app">Contact support</a>
+        </p>
+    </div>
+</main>
+
+<footer>
+    <div class="wrap footer-row">
+        <div class="footer-brand"><span class="dot">V</span> VATify</div>
+        <div class="footer-links">
+            <a href="/#docs">Docs</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/#cta">Get API key</a>
+        </div>
+        <div class="footer-note">© 2026 VATify. Not affiliated with the European Commission.</div>
+    </div>
+</footer>
+
 </body>
 </html>
