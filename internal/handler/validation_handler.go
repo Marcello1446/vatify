@@ -1,16 +1,15 @@
 package handler
 
 import (
-	"net/http"
 	"github.com/Marcello1446/vatify/internal/repository"
 	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
+	"net/http"
 )
 
-
 type Request struct {
-	VAT         string `json:"vat" validate:"required,numeric,min=8,max=13"`
+	VAT         string `json:"vat" validate:"required,min=8,max=13"`
 	CountryCode string `json:"country_code" validate:"required,len=2,alpha,uppercase,oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SL SK XI"`
 }
 
@@ -29,9 +28,8 @@ type Response struct {
 }
 
 type ErrorResponse struct {
-    Error string `json:"error"`
+	Error string `json:"error"`
 }
-
 
 // ValidateHandler Gets VAT and Country Code
 // @Summary      Gets VAT and Country Code
@@ -45,7 +43,7 @@ type ErrorResponse struct {
 // @Router       /validate [post]
 func ValidateHandler(db *gorm.DB) echo.HandlerFunc {
 	return func(c *echo.Context) error {
-		
+
 		k := c.Get("api_key").(string)
 		var req Request
 
@@ -93,18 +91,17 @@ func SeeUsage(db *gorm.DB) echo.HandlerFunc {
 		k := c.Get("api_key").(string)
 
 		api_key_instance, err := repository.FindAPIKey(db, k)
-		
+
 		if err != nil {
 			return c.JSON(http.StatusNotFound, map[string]string{
 				"Error": "Could not find api key",
 			})
 		}
 
-
 		return c.JSON(http.StatusOK, map[string]any{
 			"requests_used": api_key_instance.RequestsUsed,
 			"request_limit": api_key_instance.RequestLimit,
-			"plan": api_key_instance.Plan,
+			"plan":          api_key_instance.Plan,
 		})
 	}
 }
