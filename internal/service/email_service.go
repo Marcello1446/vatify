@@ -27,7 +27,6 @@ const newAPIKeyEmailTmpl = `<!DOCTYPE html>
             <td style="padding-bottom:32px;" align="center">
               <table cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color:#22c55e; width:8px; height:8px; border-radius:50%; vertical-align:middle;"></td>
                   <td style="padding-left:8px; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.01em; vertical-align:middle;">VATify</td>
                 </tr>
               </table>
@@ -182,7 +181,6 @@ const upgradedAPIKeyEmailTmpl = `<!DOCTYPE html>
             <td style="padding-bottom:32px;" align="center">
               <table cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color:#22c55e; width:8px; height:8px; border-radius:50%; vertical-align:middle;"></td>
                   <td style="padding-left:8px; color:#ffffff; font-size:20px; font-weight:700; letter-spacing:-0.01em; vertical-align:middle;">VATify</td>
                 </tr>
               </table>
