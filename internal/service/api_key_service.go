@@ -3,11 +3,11 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"time"
 	"errors"
 	"github.com/Marcello1446/vatify/internal/model"
 	"github.com/Marcello1446/vatify/internal/repository"
 	"gorm.io/gorm"
+	"time"
 )
 
 func GenerateAPIKey(db *gorm.DB, email string, plan string) (string, error) {
@@ -15,15 +15,15 @@ func GenerateAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	_, err := repository.FindAPIKeyByEmail(db, email)
 
 	if err == nil {
-    	return "", errors.New("email already exists")
+		return "", errors.New("email already exists")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-    	return "", err
+		return "", err
 	}
 
 	var request_limit int
 
 	if plan == "free" {
-		request_limit = 500
+		request_limit = 20
 	} else if plan == "starter" {
 		request_limit = 10000
 	} else if plan == "pro" {
@@ -33,30 +33,29 @@ func GenerateAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	key := make([]byte, 32)
 	_, errr := rand.Read(key)
 	if errr != nil {
-    	return "", err
+		return "", err
 	}
 
 	plainKey := hex.EncodeToString(key)
 	hashedKey := HashAPIKey(plainKey)
 
 	api_key_instance := &model.APIKey{
-    	Key: hashedKey,
-    	IsActive: true,
-    	Owner: email,
-    	Plan: plan,
-    	RequestLimit: request_limit,
-    	RequestsUsed: 0,
-    	UsageReset: time.Now().AddDate(0, 1, 0),
+		Key:          hashedKey,
+		IsActive:     true,
+		Owner:        email,
+		Plan:         plan,
+		RequestLimit: request_limit,
+		RequestsUsed: 0,
+		UsageReset:   time.Now().AddDate(0, 1, 0),
 	}
 
 	errrr := repository.SaveAPIKey(db, api_key_instance)
 	if errrr != nil {
-    	return "", err
+		return "", err
 	}
 
 	return plainKey, nil
 }
-
 
 func ResetRequests(db *gorm.DB) error {
 	api_keys, err := repository.FindAllAPIKeysUsageReset(db)

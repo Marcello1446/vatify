@@ -38,6 +38,7 @@
   ul{list-style:none;}
 
   .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+  .pricing_wrap {max-width:800px; margin:0 auto; padding:0 24px;}
 
   /* page stays flat navy; ambient glow lives only in the hero */
   body{background-color: var(--bg);}
@@ -230,6 +231,71 @@ color-mix(in oklab, var(--background) 80%, transparent);
   .terminal-body pre{white-space:pre-wrap; word-break:break-word;}
 
   /* ---------- Stats ---------- */
+  /* ---------- Reviews ticker ---------- */
+  .reviews{
+    padding:56px 0;
+    border-bottom:1px solid var(--panel-border);
+    overflow:hidden;
+  }
+  .reviews-head{text-align:center; margin-bottom:28px;}
+  .reviews-head p{
+    font-size:12.5px; color:var(--text-faint);
+    text-transform:uppercase; letter-spacing:0.08em; font-weight:600;
+  }
+
+  .ticker-mask{
+    position:relative;
+    overflow:hidden;
+    mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+  }
+  .ticker-track{
+    display:flex;
+    gap:16px;
+    width:max-content;
+    animation: tickerScroll 38s linear infinite;
+  }
+  .ticker-mask:hover .ticker-track{
+    animation-play-state: paused;
+  }
+
+  @keyframes tickerScroll{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+  }
+
+  .review-card{
+    flex:0 0 auto;
+    width:300px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:22px;
+  }
+  .review-stars{
+    color:var(--green); font-size:13px; letter-spacing:2px; margin-bottom:12px;
+  }
+  .review-quote{
+    font-size:13.5px; color:var(--text-dim); line-height:1.65; margin-bottom:18px;
+  }
+  .review-author{display:flex; align-items:center; gap:10px;}
+  .review-avatar{
+    flex-shrink:0;
+    width:34px; height:34px; border-radius:50%;
+    background:var(--green-soft); border:1px solid var(--green-line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--green); font-size:12px; font-weight:700;
+  }
+  .review-author-name{font-size:13px; font-weight:600; color:var(--text);}
+  .review-author-role{font-size:12px; color:var(--text-faint);}
+
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{ animation:none; }
+  }
+
+
+
+
   .stats{
     border-top:1px solid var(--panel-border);
     border-bottom:1px solid var(--panel-border);
@@ -272,7 +338,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
   }
   .feature-card{
     background:var(--panel); border:1px solid var(--panel-border);
-    border-radius:12px; padding:24px;
+    border-radius:12px; padding:33px;
     transition:transform .2s ease, border-color .2s ease, background .2s ease;
   }
   .feature-card:hover{
@@ -362,14 +428,14 @@ color-mix(in oklab, var(--background) 80%, transparent);
 
   /* ---------- Pricing ---------- */
   .pricing-grid{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+    display:grid; grid-template-columns:repeat(2,1fr); gap:20px;
     align-items:stretch;
   }
   .price-card{
     background:var(--panel); border:1px solid var(--panel-border);
     border-radius:14px; padding:28px;
     display:flex; flex-direction:column;
-    height:100%;
+    height:115%;
     position:relative;
   }
   @keyframes riseIn{
@@ -454,6 +520,9 @@ color-mix(in oklab, var(--background) 80%, transparent);
   .footer-links{display:flex; gap:22px; font-size:13px; color:var(--text-dim);}
   .footer-links a:hover{color:var(--text);}
   .footer-note{font-size:12.5px; color:var(--text-faint);}
+  #cta {
+    padding-top: 130px;
+  }
 
   /* ---------- Responsive ---------- */
   @media (max-width:860px){
@@ -532,7 +601,6 @@ color-mix(in oklab, var(--background) 80%, transparent);
     <div class="stat"><div class="num">24h</div><div class="label">cache</div></div>
   </div>
 </div>
-
 <section id="docs">
   <div class="wrap">
     <div class="section-head">
@@ -689,11 +757,6 @@ color-mix(in oklab, var(--background) 80%, transparent);
             <td class="bad"><span class="cross">✕</span>1–5s, often timeouts</td>
           </tr>
           <tr>
-            <td class="row-label">Bulk support</td>
-            <td class="good"><span class="check">✓</span>Batch endpoint</td>
-            <td class="bad"><span class="cross">✕</span>One request at a time</td>
-          </tr>
-          <tr>
             <td class="row-label">Audit log</td>
             <td class="good"><span class="check">✓</span>Built in</td>
             <td class="bad"><span class="cross">✕</span>None</td>
@@ -705,7 +768,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
 </section>
 
 <section id="pricing">
-  <div class="wrap">
+  <div class="wrap pricing_wrap">
     <div class="section-head">
       <h2>Simple, predictable pricing</h2>
       <p>Start free and scale as you grow. No overage surprises — every plan includes cached VIES fallback.</p>
@@ -714,12 +777,11 @@ color-mix(in oklab, var(--background) 80%, transparent);
       <div class="price-card">
         <div class="price-name">Free</div>
         <div class="price-amount">€0<span>/month</span></div>
-        <div class="price-sub">500 requests / month</div>
+        <div class="price-sub">20 requests / month</div>
         <ul class="price-features">
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>500 validations / month</li>
+          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>20 validations / month</li>
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Cached VIES responses</li>
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Community support</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>1 API key</li>
         </ul>
         <a href="#cta" class="price-btn">Start free</a>
       </div>
@@ -733,26 +795,11 @@ color-mix(in oklab, var(--background) 80%, transparent);
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>10,000 validations / month</li>
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Automatic VIES fallback</li>
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Email support</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>5 API keys</li>
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>99.9% uptime SLA</li>
         </ul>
         <a href="#cta" class="price-btn">Choose Starter</a>
       </div>
 
-      <div class="price-card">
-        <div class="price-name">Pro</div>
-        <div class="price-amount">€39<span>/month</span></div>
-        <div class="price-sub">100,000 requests / month</div>
-        <ul class="price-features">
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>100,000 validations / month</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Priority VIES fallback</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Priority support</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Unlimited API keys</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>99.99% uptime SLA</li>
-          <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Webhooks & bulk lookups</li>
-        </ul>
-        <a href="#cta" class="price-btn">Choose Pro</a>
-      </div>
     </div>
   </div>
 </section>
@@ -770,9 +817,8 @@ color-mix(in oklab, var(--background) 80%, transparent);
         <div class="field">
           <label for="plan">Plan</label>
           <select id="plan">
-            <option value="free">Free — €0 / 500 requests</option>
+            <option value="free">Free — €0 / 20 requests</option>
             <option value="starter">Starter — €15 / 10,000 requests</option>
-            <option value="pro">Pro — €49 / 100,000 requests</option>
           </select>
         </div>
         <button type="submit" class="btn-primary" id="submitBtn">Generate API key</button>
