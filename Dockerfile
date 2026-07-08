@@ -8,7 +8,7 @@ RUN go build -o /vatify ./cmd/api/
 FROM alpine
 WORKDIR /app 
 COPY --from=builder /vatify /vatify
-COPY index.html /app/index.html
-COPY success.html /app/success.html
+COPY internal/html/index.html /app/index.html
+COPY internal/html/success.html /app/success.html
 EXPOSE 8080
 CMD ["/vatify"]
