@@ -61,6 +61,13 @@ func (cv *CustomValidator) Validate(i any) error {
 func main() {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
+	e.GET("/*", func(c *echo.Context) error {
+		return c.File("index.html")
+	})
+	e.GET("/success", func(c *echo.Context) error {
+		return c.File("success.html")
+	})
+	e.GET("/cancel", func(c *echo.Context) error { return c.File("html/cancel.html") })
 
 	env, err := config.LoadEnv()
 	if err != nil {
@@ -89,13 +96,6 @@ func main() {
 	e.GET("/v1/usage", handler.SeeUsage(db), middleware.AuthAPIKey(db))
 	e.POST("/v1/checkout/sessions", handler.CheckoutHandler(db, *env))
 	e.POST("/v1/webhook", handler.WebhookHandler(db, *env))
-	e.GET("/*", func(c *echo.Context) error {
-		return c.File("index.html")
-	})
-	e.GET("/success", func(c *echo.Context) error {
-		return c.File("success.html")
-	})
-	e.GET("/cancel", func(c *echo.Context) error { return c.File("cancel.html") })
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
