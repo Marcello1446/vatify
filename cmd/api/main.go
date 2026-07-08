@@ -95,6 +95,7 @@ func main() {
 	e.GET("/success", func(c *echo.Context) error {
 		return c.File("success.html")
 	})
+	e.GET("/cancel", func(c *echo.Context) error { return c.File("cancel.html") })
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
