@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VATify — How to cancel your subscription</title>
+<link rel="shortcut icon" href="./icon.png" type="image/x-icon">
+<style>
+  :root{
+    --bg: #0f172a;
+    --bg-soft: #131f38;
+    --panel: #1e293b;
+    --panel-border: #334155;
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --text-faint: #64748b;
+    --green: #22c55e;
+    --green-dark: #052e16;
+    --blue: #38bdf8;
+    --green-soft: rgba(34,197,94,0.12);
+    --green-line: rgba(34,197,94,0.35);
+    --red: #f87171;
+    --mono: 'Geist Fallback', 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --sans: 'Geist Fallback', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+  .wrap{max-width:840px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- Header (same as landing) ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background-color: color-mix(in oklab, var(--bg) 80%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .nav{
+    max-width:1120px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px;}
+  .brand .dot{
+    width:20px; height:20px; border-radius:6px;
+    background:var(--green); color:#04140d;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800;
+  }
+  .nav-links{display:flex; gap:28px; font-size:14px; color:var(--text-dim);}
+  .nav-links a:hover{color:var(--text);}
+  .nav-cta{
+    background:var(--green); color:#04140d; font-weight:600; font-size:14px;
+    padding:9px 16px; border-radius:8px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(52,211,153,0.25);}
+
+  /* ---------- Page hero ---------- */
+  .page-hero{
+    padding:64px 0 48px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12px; color:var(--green);
+    background:var(--green-soft); border:1px solid var(--green-line);
+    padding:6px 12px; border-radius:999px; margin-bottom:20px;
+  }
+  .badge::before{
+    content:''; width:6px; height:6px; border-radius:50%; background:var(--green);
+    box-shadow:0 0 0 3px rgba(52,211,153,0.25);
+  }
+  .page-hero h1{
+    font-size:36px; font-weight:800; letter-spacing:-0.01em; margin-bottom:14px;
+  }
+  .page-hero p.lead{
+    color:var(--text-dim); font-size:15.5px; line-height:1.7; max-width:560px;
+  }
+
+  /* ---------- Steps ---------- */
+  .guide-steps{padding:56px 0; display:flex; flex-direction:column; gap:36px;}
+  .guide-step{display:grid; grid-template-columns:44px 1fr; gap:20px;}
+  .guide-step-num{
+    width:44px; height:44px; border-radius:12px;
+    background:var(--panel); border:1px solid var(--panel-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:800; color:var(--green);
+  }
+  .guide-step h3{font-size:17px; font-weight:700; margin-bottom:8px;}
+  .guide-step p{color:var(--text-dim); font-size:14.5px; line-height:1.7; margin-bottom:16px;}
+  .guide-step p code{
+    font-family:var(--mono); font-size:13px; color:var(--blue);
+    background:var(--bg-soft); padding:2px 6px; border-radius:4px;
+  }
+
+  /* Screenshot mockup — replace with a real screenshot of your portal flow */
+  .shot{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:12px; overflow:hidden;
+    box-shadow:0 20px 40px -20px rgba(0,0,0,0.5);
+  }
+  .shot-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; border-bottom:1px solid var(--panel-border);
+    background:rgba(255,255,255,0.015);
+  }
+  .shot-bar .tdot{width:9px; height:9px; border-radius:50%;}
+  .tdot.r{background:#f87171;} .tdot.y{background:#fbbf24;} .tdot.g{background:#34d399;}
+  .shot-bar .shot-url{
+    margin-left:8px; font-size:11.5px; color:var(--text-faint); font-family:var(--mono);
+  }
+  .shot-body{padding:24px; background:var(--bg-soft);}
+  .shot-placeholder{
+    border:1px dashed var(--panel-border); border-radius:10px;
+    padding:28px 20px; text-align:center;
+  }
+  .shot-placeholder .icon{
+    width:36px; height:36px; margin:0 auto 12px;
+    color:var(--text-faint);
+  }
+  .shot-placeholder p{
+    color:var(--text-faint); font-size:12.5px; margin:0; line-height:1.6;
+  }
+
+  /* Illustrative mock buttons/rows used inside placeholders */
+  .mock-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:8px; padding:12px 16px; margin-bottom:10px;
+  }
+  .mock-row:last-child{margin-bottom:0;}
+  .mock-row span{font-size:13px; color:var(--text-dim);}
+  .mock-btn{
+    font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px;
+  }
+  .mock-btn.primary{background:var(--green); color:#04140d;}
+  .mock-btn.danger{background:rgba(248,113,113,0.12); color:var(--red); border:1px solid rgba(248,113,113,0.3);}
+
+  /* ---------- Callout ---------- */
+  .callout{
+    background:var(--green-soft); border:1px solid var(--green-line);
+    border-radius:10px; padding:16px 18px; margin-top:20px;
+    font-size:13.5px; color:var(--text-dim); line-height:1.7;
+  }
+  .callout strong{color:var(--text);}
+
+  /* ---------- FAQ ---------- */
+  .faq{padding:16px 0 64px; border-top:1px solid var(--panel-border);}
+  .faq h2{font-size:22px; font-weight:800; margin:48px 0 24px;}
+  .faq-item{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:10px; padding:18px 20px; margin-bottom:12px;
+  }
+  .faq-item h4{font-size:14.5px; font-weight:700; margin-bottom:8px;}
+  .faq-item p{font-size:13.5px; color:var(--text-dim); line-height:1.7;}
+
+  /* ---------- Manage-subscription CTA ---------- */
+  .manage-cta{
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:14px; padding:32px; text-align:center; margin-bottom:8px;
+  }
+  .manage-cta h3{font-size:18px; font-weight:700; margin-bottom:8px;}
+  .manage-cta p{color:var(--text-dim); font-size:13.5px; margin-bottom:20px;}
+  .btn-primary{
+    display:inline-block;
+    background:var(--green); color:#04140d; font-weight:600; font-size:14px;
+    padding:12px 22px; border-radius:9px; border:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 22px rgba(52,211,153,0.28);}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--panel-border); padding:36px 0;}
+  .footer-row{
+    max-width:1120px; margin:0 auto; padding:0 24px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  }
+  .footer-brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px;}
+  .footer-brand .dot{
+    width:18px; height:18px; border-radius:6px; background:var(--green);
+    color:#04140d; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800;
+  }
+  .footer-links{display:flex; gap:22px; font-size:13px; color:var(--text-dim);}
+  .footer-links a:hover{color:var(--text);}
+  .footer-note{font-size:12.5px; color:var(--text-faint);}
+
+  @media (max-width:600px){
+    .guide-step{grid-template-columns:1fr;}
+    .guide-step-num{margin-bottom:4px;}
+    .page-hero h1{font-size:28px;}
+    .footer-row{flex-direction:column; align-items:flex-start;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a href="/" class="brand"><span class="dot">V</span> VATify</a>
+    <div class="nav-links">
+      <a href="https://vatify-production.up.railway.app/swagger/index.html" target="_blank">Docs</a>
+      <a href="/#pricing">Pricing</a>
+    </div>
+    <a href="/#cta" class="nav-cta">Get API key</a>
+  </nav>
+</header>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="badge">Billing help</span>
+    <h1>How to cancel your subscription</h1>
+    <p class="lead">You can cancel anytime from the billing portal — no emails, no calls. Your plan stays active until the end of your current billing period, then it simply won't renew.</p>
+  </div>
+</section>
+
+<section class="guide-steps wrap">
+
+  <div class="guide-step">
+    <div class="guide-step-num">1</div>
+    <div>
+      <h3>Open your billing portal</h3>
+      <p>Go to the stripe.com and login<br>Click <strong>Billing > Subscriptions</strong> below. You'll be taken straight to your secure billing portal — no separate login needed.</p>
+      <div class="shot">
+        <div class="shot-bar">
+          <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+          <span class="shot-url">stripe</span>
+        </div>
+        <div class="shot-body">
+          <div class="shot-placeholder">
+            <img src="./img/s1.png">
+            <img src="./img/s2.png">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-step">
+    <div class="guide-step-num">2</div>
+    <div>
+      <h3>Find your active plan</h3>
+      <p>In the portal, you'll see your current plan and next billing date at the top of the page. Click 3 dots nearby.</p>
+      <div class="shot">
+        <div class="shot-bar">
+          <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+          <span class="shot-url">billing.stripe.com</span>
+        </div>
+        <div class="shot-body">
+          <img width="750px" src="./img/s3.png">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-step">
+    <div class="guide-step-num">3</div>
+    <div>
+      <h3>Cancel your plan</h3>
+      <p>Click <strong>Cancel subscription</strong>, then confirm on the dialog that follows. Stripe will ask if you're sure — this is your last chance to back out.</p>
+      <div class="shot">
+        <div class="shot-bar">
+          <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+          <span class="shot-url">billing.stripe.com</span>
+        </div>
+        <div class="shot-body">
+          <img src="./img/s4.png">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-step">
+    <div class="guide-step-num">4</div>
+    <div>
+      <h3>You're done</h3>
+      <p>Your API key keeps working at full plan limits until your current period ends, then it automatically drops to the Free tier — no need to do anything else.</p>
+      <div class="callout">
+        <strong>Nothing breaks.</strong> Your existing API key stays valid. Once your plan ends, it simply moves to Free-tier limits (500 requests/month) instead of being disabled.
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<section class="faq wrap">
+  <h2>Common questions</h2>
+
+  <div class="faq-item">
+    <h4>Will I lose access immediately?</h4>
+    <p>Depends on what you chose. Cancelling stops future billing, but you keep your current plan's limits until the period you already paid for ends or you stop your plan immediately based on your choice after you clicked 'Cancel subscription'.</p>
+  </div>
+
+  <div class="faq-item">
+    <h4>What happens to my API key?</h4>
+    <p>It keeps working. After your billing period ends, it automatically switches to Free-tier limits — you don't need to regenerate anything.</p>
+  </div>
+
+  <div class="faq-item">
+    <h4>Can I resubscribe later?</h4>
+    <p>Yes, anytime. Choose a plan again from the pricing page and your existing API key will be upgraded — no new key needed.</p>
+  </div>
+
+  <div class="faq-item">
+    <h4>Do I get a refund for the unused part of my period?</h4>
+    <p>Cancelling doesn't issue an automatic refund — you keep access for the period you already paid for instead. If you have a billing question outside that, contact support.</p>
+  </div>
+
+  <div class="faq-item">
+    <h4>I can't find the appropriate link or button. What do I do?</h4>
+    <p><a href="mailto:support@vatify-production.up.railway.app" style="color:var(--green); text-decoration:underline;">Contact support</a> and we'll help directly.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-row">
+    <div class="footer-brand"><span class="dot">V</span> VATify</div>
+    <div class="footer-links">
+      <a href="/#docs">Docs</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#cta">Get API key</a>
+    </div>
+    <div class="footer-note">© 2026 VATify. Not affiliated with the European Commission.</div>
+  </div>
+</footer>
+
+<script>
+  // TODO: wire this up once your backend endpoint for creating a
+  // Stripe billing portal session exists, e.g.:
+  //
+  //   document.getElementById('managePortalBtn').addEventListener('click', async (e) => {
+  //     e.preventDefault();
+  //     const res = await fetch(API + '/v1/billing/portal', {
+  //       method: 'POST',
+  //       headers: {'Content-Type':'application/json'},
+  //       body: JSON.stringify({ email })
+  //     });
+  //     const data = await res.json();
+  //     window.location.href = data.portal_url;
+  //   });
+</script>
+
+</body>
+</html>

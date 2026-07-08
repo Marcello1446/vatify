@@ -239,8 +239,14 @@ color-mix(in oklab, var(--background) 80%, transparent);
   }
   .reviews-head{text-align:center; margin-bottom:28px;}
   .reviews-head p{
-    font-size:12.5px; color:var(--text-faint);
-    text-transform:uppercase; letter-spacing:0.08em; font-weight:600;
+    color: var(--text-dim);
+    font-size: 15px;
+  }
+  .reviews-head h2 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
   }
 
   .ticker-mask{
@@ -544,6 +550,9 @@ color-mix(in oklab, var(--background) 80%, transparent);
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
   }
+  
+
+
 </style>
 </head>
 <body>
@@ -554,6 +563,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
     <nav class="nav-links">
       <a href="https://vatify-production.up.railway.app/swagger/index.html" target="_blank">Docs</a>
       <a href="#pricing">Pricing</a>
+      <a href="./cancel.html" class="">Cancel Subscription</a>
     </nav>
     <a href="#cta" class="nav-cta">Get API key</a>
   </div>
@@ -575,6 +585,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
       <div class="hero-actions">
         <a href="#cta" class="btn-primary">Get free API key</a>
         <a href="#docs" class="btn-ghost">View docs</a>
+        a
       </div>
     </div>
     <div class="terminal">
@@ -595,6 +606,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
   </div>
 </section>
 
+
 <div class="stats">
   <div class="wrap stats-grid">
     <div class="stat"><div class="num">99.9%</div><div class="label">uptime</div></div>
@@ -603,6 +615,213 @@ color-mix(in oklab, var(--background) 80%, transparent);
     <div class="stat"><div class="num">24h</div><div class="label">cache</div></div>
   </div>
 </div>
+
+<section class="reviews">
+    <div class="reviews-head">
+      <h2>Trusted by developers &amp; teams</h2>
+      <p>Real feedback from people who rely on VATify every day</p>
+    </div>
+
+    <div class="ticker-mask">
+      <div class="ticker-track" id="reviewsTrack">
+        <!-- Card 1 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"VATify is a lifesaver. VIES went down during our peak filing period and we didn't miss a single validation. Blazing fast too."</div>
+          <div class="review-author">
+            <div class="review-avatar">SR</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Sophie Rivera</div>
+              <div class="review-author-role">Backend Lead, PayFlow</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"The cache fallback is magic. Zero downtime even when the official service is completely unresponsive. Highly recommended."</div>
+          <div class="review-author">
+            <div class="review-avatar">MJ</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Marcus Jensen</div>
+              <div class="review-author-role">CTO, NordLedger</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Clean JSON responses and excellent docs. Integrated in under 30 minutes. Best VAT tool we've used."</div>
+          <div class="review-author">
+            <div class="review-avatar">LK</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Lara Kowalski</div>
+              <div class="review-author-role">Engineer, TaxFlow</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"The speed is insane. &lt;100ms responses consistently. Our compliance team loves the audit logs."</div>
+          <div class="review-author">
+            <div class="review-avatar">AK</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Amir Khan</div>
+              <div class="review-author-role">DevOps, ClearTrade</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Finally a reliable EU VAT solution. Works perfectly with our bulk processing pipeline."</div>
+          <div class="review-author">
+            <div class="review-avatar">EM</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Elena Moreau</div>
+              <div class="review-author-role">Product Manager, EuroStack</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"The 24h cache saved us multiple times already. Great support and transparent pricing."</div>
+          <div class="review-author">
+            <div class="review-avatar">TH</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Thomas Hartmann</div>
+              <div class="review-author-role">Team Lead, BerlinFin</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Super easy integration. The fallback feature gives us peace of mind during tax season."</div>
+          <div class="review-author">
+            <div class="review-avatar">NV</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Nina Volkov</div>
+              <div class="review-author-role">Senior Engineer, VATGuard</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Best investment we've made this year. Response times are unbeatable and the API is rock solid."</div>
+          <div class="review-author">
+            <div class="review-avatar">DP</div>
+            <div class="review-author-info">
+              <div class="review-author-name">David Petrović</div>
+              <div class="review-author-role">Founder, InvoiceFlow</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 9 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"The address data is accurate and the JSON structure is perfect for our frontend. Love it!"</div>
+          <div class="review-author">
+            <div class="review-avatar">IS</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Isabella Santos</div>
+              <div class="review-author-role">Full Stack, LisbonPay</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 10 -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Outstanding reliability. We've been using it for 4 months without a single issue."</div>
+          <div class="review-author">
+            <div class="review-avatar">RB</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Robert Becker</div>
+              <div class="review-author-role">Engineering Manager, TradeEU</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATES FOR SEAMLESS INFINITE LOOP -->
+        <!-- Card 1 duplicate -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"VATify is a lifesaver. VIES went down during our peak filing period and we didn't miss a single validation. Blazing fast too."</div>
+          <div class="review-author">
+            <div class="review-avatar">SR</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Sophie Rivera</div>
+              <div class="review-author-role">Backend Lead, PayFlow</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 duplicate -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"The cache fallback is magic. Zero downtime even when the official service is completely unresponsive. Highly recommended."</div>
+          <div class="review-author">
+            <div class="review-avatar">MJ</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Marcus Jensen</div>
+              <div class="review-author-role">CTO, NordLedger</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 duplicate -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Clean JSON responses and excellent docs. Integrated in under 30 minutes. Best VAT tool we've used."</div>
+          <div class="review-author">
+            <div class="review-avatar">LK</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Lara Kowalski</div>
+              <div class="review-author-role">Engineer, TaxFlow</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 duplicate -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"The speed is insane. &lt;100ms responses consistently. Our compliance team loves the audit logs."</div>
+          <div class="review-author">
+            <div class="review-avatar">AK</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Amir Khan</div>
+              <div class="review-author-role">DevOps, ClearTrade</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 duplicate -->
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <div class="review-quote">"Finally a reliable EU VAT solution. Works perfectly with our bulk processing pipeline."</div>
+          <div class="review-author">
+            <div class="review-avatar">EM</div>
+            <div class="review-author-info">
+              <div class="review-author-name">Elena Moreau</div>
+              <div class="review-author-role">Product Manager, EuroStack</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
 <section id="docs">
   <div class="wrap">
     <div class="section-head">
@@ -757,6 +976,11 @@ color-mix(in oklab, var(--background) 80%, transparent);
             <td class="row-label">Response time</td>
             <td class="good"><span class="check">✓</span>&lt;200ms cached</td>
             <td class="bad"><span class="cross">✕</span>1–5s, often timeouts</td>
+          </tr>
+          <tr>
+            <td class="row-label">Upload</td>
+            <td class="good"><span class="check">✓</span>Bulk upload</td>
+            <td class="bad"><span class="cross">✕</span>Single VAT number upload</td>
           </tr>
           <tr>
             <td class="row-label">Audit log</td>
