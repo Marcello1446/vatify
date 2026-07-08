@@ -427,6 +427,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
   .cross{color:var(--red); margin-right:6px;}
 
   /* ---------- Pricing ---------- */
+
   .pricing-grid{
     display:grid; grid-template-columns:repeat(2,1fr); gap:20px;
     align-items:stretch;
@@ -435,9 +436,10 @@ color-mix(in oklab, var(--background) 80%, transparent);
     background:var(--panel); border:1px solid var(--panel-border);
     border-radius:14px; padding:28px;
     display:flex; flex-direction:column;
-    height:115%;
+    height:100%;
     position:relative;
   }
+
   @keyframes riseIn{
     from{opacity:0; transform:translateY(24px);}
     to{opacity:1; transform:translateY(0);}
@@ -521,7 +523,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
   .footer-links a:hover{color:var(--text);}
   .footer-note{font-size:12.5px; color:var(--text-faint);}
   #cta {
-    padding-top: 130px;
+    padding-top: 100px;
   }
 
   /* ---------- Responsive ---------- */
@@ -771,7 +773,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
   <div class="wrap pricing_wrap">
     <div class="section-head">
       <h2>Simple, predictable pricing</h2>
-      <p>Start free and scale as you grow. No overage surprises — every plan includes cached VIES fallback.</p>
+      <p>Start free and scale as you grow. No overage surprises — every plan includes cached VIES fallback. Cancel anytime.</p>
     </div>
     <div class="pricing-grid">
       <div class="price-card">
@@ -797,7 +799,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Email support</li>
           <li><svg fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>99.9% uptime SLA</li>
         </ul>
-        <a href="#cta" class="price-btn">Choose Starter</a>
+        <a href="#cta" class="price-btn price-btn_starter">Choose Starter</a>
       </div>
 
     </div>
@@ -879,6 +881,7 @@ color-mix(in oklab, var(--background) 80%, transparent);
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
+                  email,
                   plan,
                   api_key: alreadyExists ? "existing" : keyData.api_key,
                   success_url: window.location.origin + '/success',

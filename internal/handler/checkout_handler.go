@@ -10,10 +10,11 @@ import (
 )
 
 type StripeRequest struct {
-	APIKey     string `json:"api_key"`
-	Plan       string `json:"plan"`
-	SuccessURL string `json:"success_url"`
-	CancelURL  string `json:"cancel_url"`
+	APIKey        string `json:"api_key"`
+	Plan          string `json:"plan"`
+	SuccessURL    string `json:"success_url"`
+	CancelURL     string `json:"cancel_url"`
+	CustomerEmail string `json:"email"`
 }
 
 func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
@@ -49,8 +50,9 @@ func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 
 		sc := stripe.NewClient(env.StripeSecretKey)
 		params := &stripe.CheckoutSessionCreateParams{
-			SuccessURL: stripe.String(stripe_request.SuccessURL),
-			CancelURL:  stripe.String(stripe_request.CancelURL),
+			CustomerEmail: stripe.String(stripe_request.CustomerEmail),
+			SuccessURL:    stripe.String(stripe_request.SuccessURL),
+			CancelURL:     stripe.String(stripe_request.CancelURL),
 			LineItems: []*stripe.CheckoutSessionCreateLineItemParams{
 				{
 					Price:    stripe.String(string(price_id)),
