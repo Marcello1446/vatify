@@ -67,7 +67,7 @@ func main() {
 	e.GET("/success", func(c *echo.Context) error {
 		return c.File("success.html")
 	})
-	e.GET("/cancel", func(c *echo.Context) error { return c.File("html/cancel.html") })
+	e.GET("/cancel", func(c *echo.Context) error { return c.File("cancel.html") })
 
 	env, err := config.LoadEnv()
 	if err != nil {
