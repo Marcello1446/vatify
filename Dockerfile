@@ -11,6 +11,10 @@ COPY --from=builder /vatify /vatify
 COPY internal/html/index.html /app/index.html
 COPY internal/html/success.html /app/success.html
 COPY internal/html/cancel.html /app/cancel.html
-COPY img /app
+COPY img/icon.png /app/icon.png
+COPY img/s1.png /app/s1.png
+COPY img/s2.png /app/s2.png
+COPY img/s3.png /app/s3.png
+COPY img/s4.png /app/s4.png
 EXPOSE 8080
 CMD ["/vatify"]
