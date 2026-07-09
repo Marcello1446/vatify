@@ -17,6 +17,7 @@ import (
 func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var checkout_session *stripe.CheckoutSession
+		var subscription_object *stripe.Subscription
 
 		raw_body, err := io.ReadAll(c.Request().Body)
 
@@ -78,7 +79,31 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			return c.JSON(http.StatusOK, map[string]string{
 				"Message": "Your plan was successfully updated!",
 			})
-		} else if event.Type == "checkout.session.completed" {
+		} else if event.Type == "customer.subscription.deleted" {
+			raw_data := event.Data.Raw
+			errr := json.Unmarshal(raw_data, &subscription_object)
+
+			if errr != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to unmarshal data",
+				})
+			}
+
+			email := subscription_object.Customer.Email
+			fmt.Println("Customer's email on deleting function", email)
+			fmt.Println("Customer's stripe ID on deleting function", subscription_object.Customer.ID)
+
+			if err := service.DowngradePlan(db, email); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to downgrade your plan",
+				})
+			}
+
+			return c.JSON(http.StatusOK, map[string]string{
+				"Message": "Your plan was downgraded successfully",
+			})
+
+		} else if event.Type == "customer.subscription.updated" {
 
 		}
 
