@@ -97,6 +97,7 @@ func main() {
 	})
 	e.GET("/cancel", func(c *echo.Context) error { return c.File("cancel.html") })
 
+	e.Static("/", "img")
 	e.Static("/img/*", "img")
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
