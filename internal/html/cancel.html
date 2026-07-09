@@ -272,6 +272,7 @@
     <div>
       <h3>Cancel your plan</h3>
       <p>Click <strong>Cancel subscription</strong>, then confirm on the dialog that follows. Stripe will ask if you're sure — this is your last chance to back out.</p>
+      <p>Choose what type of cancellation is appropriate for you: Immediate — immediately after choosing option or End of the current period - you will have access to the paid plan till your charging date, however YOU WON'T BE CHARGED AGAIN!</p>
       <div class="shot">
         <div class="shot-bar">
           <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
@@ -279,6 +280,7 @@
         </div>
         <div class="shot-body">
           <img src="../../img/s4.png">
+          <img src="../../img/s5.png">
         </div>
       </div>
     </div>
@@ -322,7 +324,7 @@
 
   <div class="faq-item">
     <h4>I can't find the appropriate link or button. What do I do?</h4>
-    <p><a href="mailto:support@vatify-production.up.railway.app" style="color:var(--green); text-decoration:underline;">Contact support</a> and we'll help directly.</p>
+    <p><a href="#" style="color:var(--green); text-decoration:underline;">Contact support</a> and we'll help directly.</p>
   </div>
 </section>
 
@@ -337,22 +339,6 @@
     <div class="footer-note">© 2026 VATify. Not affiliated with the European Commission.</div>
   </div>
 </footer>
-
-<script>
-  // TODO: wire this up once your backend endpoint for creating a
-  // Stripe billing portal session exists, e.g.:
-  //
-  //   document.getElementById('managePortalBtn').addEventListener('click', async (e) => {
-  //     e.preventDefault();
-  //     const res = await fetch(API + '/v1/billing/portal', {
-  //       method: 'POST',
-  //       headers: {'Content-Type':'application/json'},
-  //       body: JSON.stringify({ email })
-  //     });
-  //     const data = await res.json();
-  //     window.location.href = data.portal_url;
-  //   });
-</script>
 
 </body>
 </html>

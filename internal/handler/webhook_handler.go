@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Marcello1446/vatify/config"
 	"github.com/Marcello1446/vatify/internal/service"
@@ -38,47 +39,49 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			})
 		}
 
-		if event.Type != "checkout.session.completed" {
-			return c.JSON(http.StatusOK, nil)
-		}
+		if event.Type == "checkout.session.completed" {
+			raw_data := event.Data.Raw
+			errr := json.Unmarshal(raw_data, &checkout_session)
 
-		raw_data := event.Data.Raw
-		errr := json.Unmarshal(raw_data, &checkout_session)
-
-		if errr != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"Error": "Failed to unmarshal data",
-			})
-		}
-
-		if len(checkout_session.Metadata["plan"]) == 0 {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"Error": "Failed to read a 'plan' field",
-			})
-		}
-
-		if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"]); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"Error": "Failed to upgrade plan",
-			})
-		}
-
-		if checkout_session.Metadata["api_key"] == "existing" {
-			if err := service.SendEmailWithUpgradedAPIKey(env, checkout_session.CustomerDetails.Email, checkout_session.Metadata["request_limit"], checkout_session.Metadata["plan"]); err != nil {
+			if errr != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
-					"Error": "Failed to send email with updated api key",
+					"Error": "Failed to unmarshal data",
 				})
 			}
-		} else {
-			if err := service.SendEmailWithNewAPIKey(env, checkout_session.Metadata["request_limit"], checkout_session.CustomerDetails.Email, checkout_session.Metadata["api_key"], checkout_session.Metadata["plan"]); err != nil {
+
+			if len(checkout_session.Metadata["plan"]) == 0 {
 				return c.JSON(http.StatusBadRequest, map[string]string{
-					"Error": "Failed to send email with new api key",
+					"Error": "Failed to read a 'plan' field",
 				})
 			}
+
+			if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"]); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to upgrade plan",
+				})
+			}
+
+			if checkout_session.Metadata["api_key"] == "existing" {
+				if err := service.SendEmailWithUpgradedAPIKey(env, checkout_session.CustomerDetails.Email, checkout_session.Metadata["request_limit"], checkout_session.Metadata["plan"]); err != nil {
+					return c.JSON(http.StatusBadRequest, map[string]string{
+						"Error": "Failed to send email with updated api key",
+					})
+				}
+			} else {
+				if err := service.SendEmailWithNewAPIKey(env, checkout_session.Metadata["request_limit"], checkout_session.CustomerDetails.Email, checkout_session.Metadata["api_key"], checkout_session.Metadata["plan"]); err != nil {
+					return c.JSON(http.StatusBadRequest, map[string]string{
+						"Error": "Failed to send email with new api key",
+					})
+				}
+			}
+
+			return c.JSON(http.StatusOK, map[string]string{
+				"Message": "Your plan was successfully updated!",
+			})
+		} else if event.Type == "checkout.session.completed" {
+
 		}
 
-		return c.JSON(http.StatusOK, map[string]string{
-			"Message": "Your plan was successfully updated!",
-		})
+		return errors.New("Event type does not match our listed ones")
 	}
 }

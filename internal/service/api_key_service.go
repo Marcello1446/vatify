@@ -103,3 +103,23 @@ func UpgradePlan(db *gorm.DB, email, plan string) error {
 
 	return nil
 }
+
+func DowngradePlan(db *gorm.DB, email string) error {
+	api_key_instance, err := repository.FindAPIKeyByEmail(db, email)
+
+	if err != nil {
+		return err
+	}
+
+	request_limit := 20
+
+	api_key_instance.Plan = "free"
+	api_key_instance.RequestLimit = request_limit
+	api_key_instance.UsageReset = time.Now().AddDate(0, 1, 0)
+
+	if res := db.Save(&api_key_instance); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}
