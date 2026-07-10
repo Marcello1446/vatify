@@ -18,7 +18,6 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var checkout_session *stripe.CheckoutSession
 		var subscription_object *stripe.Subscription
-		var subscription_customer_id string
 
 		raw_body, err := io.ReadAll(c.Request().Body)
 
@@ -44,8 +43,6 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 		if event.Type == "checkout.session.completed" {
 			raw_data := event.Data.Raw
 			errr := json.Unmarshal(raw_data, &checkout_session)
-			customer_id := checkout_session.Customer.ID
-			subscription_customer_id = customer_id
 
 			if errr != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
@@ -59,7 +56,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 				})
 			}
 
-			if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"], customer_id); err != nil {
+			if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"], checkout_session.Customer.ID); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
 					"Error": "Failed to upgrade plan",
 				})
@@ -92,8 +89,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 				})
 			}
 
-			fmt.Println("Stripe customer id: ", subscription_customer_id)
-			if err := service.DowngradePlan(db, subscription_customer_id); err != nil {
+			if err := service.DowngradePlan(db, subscription_object.Customer.ID); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
 					"Error": "Failed to cancel subscription immediately",
 				})
