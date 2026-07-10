@@ -106,8 +106,8 @@ func UpgradePlan(db *gorm.DB, email, plan, customer_id string) error {
 	return nil
 }
 
-func DowngradePlan(db *gorm.DB, email string) error {
-	api_key_instance, err := repository.FindAPIKeyByEmail(db, email)
+func DowngradePlan(db *gorm.DB, customer_id string) error {
+	api_key_instance, err := repository.FindAPIKeyByStripeCustomerID(db, customer_id)
 
 	if err != nil {
 		return err

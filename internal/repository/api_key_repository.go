@@ -24,7 +24,6 @@ func FindAPIKey(db *gorm.DB, key string) (*model.APIKey, error) {
 	return api_key, nil
 }
 
-
 func IncreaseUsedRequests(db *gorm.DB, key string) error {
 	var api_key *model.APIKey
 
@@ -39,8 +38,7 @@ func IncreaseUsedRequests(db *gorm.DB, key string) error {
 	return nil
 }
 
-
-func FindAllAPIKeysUsageReset(db *gorm.DB) ([]model.APIKey ,error) {
+func FindAllAPIKeysUsageReset(db *gorm.DB) ([]model.APIKey, error) {
 	var api_keys []model.APIKey
 
 	if res := db.Where("usage_reset < ?", time.Now()).Find(&api_keys); res.Error != nil {
@@ -50,23 +48,31 @@ func FindAllAPIKeysUsageReset(db *gorm.DB) ([]model.APIKey ,error) {
 	return api_keys, nil
 }
 
-
 func ResetRequestsUsed(db *gorm.DB, api_key *model.APIKey) error {
 	api_key.RequestsUsed = 0
 	api_key.UsageReset = time.Now().AddDate(0, 1, 0)
-
 
 	if res := db.Save(&api_key); res.Error != nil {
 		return res.Error
 	}
 
 	return nil
-} 
+}
 
 func FindAPIKeyByEmail(db *gorm.DB, email string) (*model.APIKey, error) {
 	var api_key *model.APIKey
 
 	if res := db.Where("owner = ?", email).First(&api_key); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return api_key, nil
+}
+
+func FindAPIKeyByStripeCustomerID(db *gorm.DB, customer_id string) (*model.APIKey, error) {
+	var api_key *model.APIKey
+
+	if res := db.Where("stripe_customer_id = ?", customer_id).First(&api_key); res.Error != nil {
 		return nil, res.Error
 	}
 
