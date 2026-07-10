@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
+	"time"
 )
 
 func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
@@ -100,6 +101,26 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			})
 
 		} else if event.Type == "customer.subscription.updated" {
+			raw_data := event.Data.Raw
+			if err := json.Unmarshal(raw_data, &subscription_object); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to unmarshal data",
+				})
+			}
+
+			cancel_at_period_end := subscription_object.CancelAtPeriodEnd
+			cancel_at := time.Unix(subscription_object.CancelAt, 0)
+			customer_id := subscription_object.Customer.ID
+
+			if err := service.UpdateCancellationStatus(db, customer_id, cancel_at_period_end, &cancel_at); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to update cancellation status",
+				})
+			}
+
+			return c.JSON(http.StatusOK, map[string]string{
+				"Message": "You have successfully updated your cancellation status. Right now you won't be charged for next billing cycle, however until your paid plan lasts you are able to use our functionality",
+			})
 
 		}
 

@@ -31,8 +31,7 @@ func GenerateAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	}
 
 	key := make([]byte, 32)
-	_, errr := rand.Read(key)
-	if errr != nil {
+	if _, err := rand.Read(key); err != nil {
 		return "", err
 	}
 
@@ -40,18 +39,19 @@ func GenerateAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	hashedKey := HashAPIKey(plainKey)
 
 	api_key_instance := &model.APIKey{
-		StripeCustomerID: "",
-		Key:              hashedKey,
-		IsActive:         true,
-		Owner:            email,
-		Plan:             plan,
-		RequestLimit:     request_limit,
-		RequestsUsed:     0,
-		UsageReset:       time.Now().AddDate(0, 1, 0),
+		StripeCustomerID:  "",
+		Key:               hashedKey,
+		IsActive:          true,
+		Owner:             email,
+		Plan:              plan,
+		RequestLimit:      request_limit,
+		RequestsUsed:      0,
+		UsageReset:        time.Now().AddDate(0, 1, 0),
+		CancelAtPeriodEnd: false,
+		CancelAt:          nil,
 	}
 
-	errrr := repository.SaveAPIKey(db, api_key_instance)
-	if errrr != nil {
+	if err := repository.SaveAPIKey(db, api_key_instance); err != nil {
 		return "", err
 	}
 
@@ -118,6 +118,30 @@ func DowngradePlan(db *gorm.DB, customer_id string) error {
 	api_key_instance.Plan = "free"
 	api_key_instance.RequestLimit = request_limit
 	api_key_instance.UsageReset = time.Now().AddDate(0, 1, 0)
+	api_key_instance.CancelAtPeriodEnd = false
+	api_key_instance.CancelAt = nil
+
+	if res := db.Save(&api_key_instance); res.Error != nil {
+		return res.Error
+	}
+
+	return nil
+}
+
+func UpdateCancellationStatus(db *gorm.DB, customerID string, cancelAtPeriodEnd bool, cancelAt *time.Time) error {
+	api_key_instance, err := repository.FindAPIKeyByStripeCustomerID(db, customerID)
+
+	if err != nil {
+		return err
+	}
+
+	if cancelAtPeriodEnd {
+		api_key_instance.CancelAtPeriodEnd = cancelAtPeriodEnd
+		api_key_instance.CancelAt = cancelAt
+	} else {
+		api_key_instance.CancelAtPeriodEnd = false
+		api_key_instance.CancelAt = nil
+	}
 
 	if res := db.Save(&api_key_instance); res.Error != nil {
 		return res.Error
