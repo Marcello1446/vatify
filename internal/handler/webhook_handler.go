@@ -92,6 +92,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 				})
 			}
 
+			fmt.Println("Stripe customer id: ", subscription_customer_id)
 			if err := service.DowngradePlan(db, subscription_customer_id); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
 					"Error": "Failed to cancel subscription immediately",
