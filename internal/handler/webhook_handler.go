@@ -85,7 +85,6 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 		} else if event.Type == "customer.subscription.deleted" {
 			raw_data := event.Data.Raw
 			errr := json.Unmarshal(raw_data, &subscription_object)
-			customer_id := checkout_session.Customer.ID
 
 			if errr != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
@@ -93,7 +92,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 				})
 			}
 
-			if err := service.DowngradePlan(db, customer_id); err != nil {
+			if err := service.DowngradePlan(db, subscription_customer_id); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
 					"Error": "Failed to cancel subscription immediately",
 				})
