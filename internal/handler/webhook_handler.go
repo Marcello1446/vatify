@@ -18,6 +18,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var checkout_session *stripe.CheckoutSession
 		var subscription_object *stripe.Subscription
+		var subscription_customer_id string
 
 		raw_body, err := io.ReadAll(c.Request().Body)
 
@@ -44,6 +45,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			raw_data := event.Data.Raw
 			errr := json.Unmarshal(raw_data, &checkout_session)
 			customer_id := checkout_session.Customer.ID
+			subscription_customer_id = customer_id
 
 			if errr != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
