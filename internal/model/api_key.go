@@ -7,11 +7,12 @@ import (
 
 type APIKey struct {
 	gorm.Model
-	Key          string `gorm:"not null;uniqueIndex"`
-	IsActive     bool
-	Owner        string `gorm:"not null"`
-	Plan         string
-	RequestLimit int
-	RequestsUsed int
-	UsageReset   time.Time
+	StripeCustomerID string `gorm:"not null"`
+	Key              string `gorm:"not null;uniqueIndex"`
+	IsActive         bool
+	Owner            string `gorm:"not null"`
+	Plan             string
+	RequestLimit     int
+	RequestsUsed     int
+	UsageReset       time.Time
 }

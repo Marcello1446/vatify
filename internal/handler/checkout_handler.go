@@ -5,7 +5,6 @@ import (
 	"github.com/Marcello1446/vatify/config"
 	"github.com/labstack/echo/v5"
 	"github.com/stripe/stripe-go/v86"
-	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -17,7 +16,7 @@ type StripeRequest struct {
 	CustomerEmail string `json:"email"`
 }
 
-func CheckoutHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
+func CheckoutHandler(env config.Env) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var stripe_request StripeRequest
 

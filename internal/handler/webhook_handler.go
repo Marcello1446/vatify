@@ -18,6 +18,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		var checkout_session *stripe.CheckoutSession
 		var subscription_object *stripe.Subscription
+		var customer_id = checkout_session.Customer.ID
 
 		raw_body, err := io.ReadAll(c.Request().Body)
 
@@ -56,7 +57,7 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 				})
 			}
 
-			if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"]); err != nil {
+			if err := service.UpgradePlan(db, checkout_session.CustomerDetails.Email, checkout_session.Metadata["plan"], customer_id); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
 					"Error": "Failed to upgrade plan",
 				})
@@ -86,16 +87,6 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			if errr != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{
 					"Error": "Failed to unmarshal data",
-				})
-			}
-
-			email := subscription_object.Customer.Email
-			fmt.Println("Customer's email on deleting function", email)
-			fmt.Println("Customer's stripe ID on deleting function", subscription_object.Customer.ID)
-
-			if err := service.DowngradePlan(db, email); err != nil {
-				return c.JSON(http.StatusBadRequest, map[string]string{
-					"Error": "Failed to downgrade your plan",
 				})
 			}
 

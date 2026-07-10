@@ -40,13 +40,14 @@ func GenerateAPIKey(db *gorm.DB, email string, plan string) (string, error) {
 	hashedKey := HashAPIKey(plainKey)
 
 	api_key_instance := &model.APIKey{
-		Key:          hashedKey,
-		IsActive:     true,
-		Owner:        email,
-		Plan:         plan,
-		RequestLimit: request_limit,
-		RequestsUsed: 0,
-		UsageReset:   time.Now().AddDate(0, 1, 0),
+		StripeCustomerID: "",
+		Key:              hashedKey,
+		IsActive:         true,
+		Owner:            email,
+		Plan:             plan,
+		RequestLimit:     request_limit,
+		RequestsUsed:     0,
+		UsageReset:       time.Now().AddDate(0, 1, 0),
 	}
 
 	errrr := repository.SaveAPIKey(db, api_key_instance)
@@ -75,7 +76,7 @@ func ResetRequests(db *gorm.DB) error {
 	return nil
 }
 
-func UpgradePlan(db *gorm.DB, email, plan string) error {
+func UpgradePlan(db *gorm.DB, email, plan, customer_id string) error {
 	api_key_instance, err := repository.FindAPIKeyByEmail(db, email)
 
 	if err != nil {
@@ -92,6 +93,7 @@ func UpgradePlan(db *gorm.DB, email, plan string) error {
 		return errors.New("Plan is not valid - choose pro or starter")
 	}
 
+	api_key_instance.StripeCustomerID = customer_id
 	api_key_instance.Plan = plan
 	api_key_instance.RequestLimit = request_limit
 	api_key_instance.RequestsUsed = 0
