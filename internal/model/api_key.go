@@ -7,7 +7,7 @@ import (
 
 type APIKey struct {
 	gorm.Model
-	StripeCustomerID string `gorm:"not null"`
+	StripeCustomerID string
 	Key              string `gorm:"not null;uniqueIndex"`
 	IsActive         bool
 	Owner            string `gorm:"not null"`
