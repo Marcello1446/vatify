@@ -91,9 +91,15 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			}
 
 			if err := service.DowngradePlan(db, subscription_object.Customer.ID); err != nil {
-				return c.JSON(http.StatusBadRequest, map[string]string{
-					"Error": "Failed to cancel subscription immediately",
-				})
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return c.JSON(http.StatusOK, map[string]string{
+						"Error": "Can't find record in database",
+					})
+				} else {
+					return c.JSON(http.StatusInternalServerError, map[string]string{
+						"Error": "Failed to downgrade plan",
+					})
+				}
 			}
 
 			return c.JSON(http.StatusOK, map[string]string{
@@ -113,9 +119,15 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 			customer_id := subscription_object.Customer.ID
 
 			if err := service.UpdateCancellationStatus(db, customer_id, cancel_at_period_end, &cancel_at); err != nil {
-				return c.JSON(http.StatusBadRequest, map[string]string{
-					"Error": "Failed to update cancellation status",
-				})
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return c.JSON(http.StatusOK, map[string]string{
+						"Error": "Can't find record in database",
+					})
+				} else {
+					return c.JSON(http.StatusInternalServerError, map[string]string{
+						"Error": "Failed to update cancellation status",
+					})
+				}
 			}
 
 			return c.JSON(http.StatusOK, map[string]string{
@@ -124,6 +136,8 @@ func WebhookHandler(db *gorm.DB, env config.Env) echo.HandlerFunc {
 
 		}
 
-		return errors.New("Event type does not match our listed ones")
+		return c.JSON(http.StatusOK, map[string]string{
+			"Message": "Other type of actions are not handled here. Contact support for additional information",
+		})
 	}
 }

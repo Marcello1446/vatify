@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 type Request struct {
@@ -14,9 +15,11 @@ type Request struct {
 }
 
 type UsageResponse struct {
-	Plan         string `json:"plan"`
-	RequestsUsed int    `json:"requests_used"`
-	RequestLimit int    `json:"request_limit"`
+	Plan              string     `json:"plan"`
+	RequestsUsed      int        `json:"requests_used"`
+	RequestLimit      int        `json:"request_limit"`
+	CancelAtPeriodEnd bool       `json:"cancel_at_period_end"`
+	CancelAt          *time.Time `json:"cancel_at"`
 }
 
 type Response struct {
@@ -99,9 +102,11 @@ func SeeUsage(db *gorm.DB) echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]any{
-			"requests_used": api_key_instance.RequestsUsed,
-			"request_limit": api_key_instance.RequestLimit,
-			"plan":          api_key_instance.Plan,
+			"requests_used":        api_key_instance.RequestsUsed,
+			"request_limit":        api_key_instance.RequestLimit,
+			"plan":                 api_key_instance.Plan,
+			"cancel_at_period_end": api_key_instance.CancelAtPeriodEnd,
+			"cancel_at":            api_key_instance.CancelAt,
 		})
 	}
 }
