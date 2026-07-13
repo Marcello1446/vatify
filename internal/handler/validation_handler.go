@@ -101,12 +101,12 @@ func SeeUsage(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		return c.JSON(http.StatusOK, map[string]any{
-			"requests_used":        api_key_instance.RequestsUsed,
-			"request_limit":        api_key_instance.RequestLimit,
-			"plan":                 api_key_instance.Plan,
-			"cancel_at_period_end": api_key_instance.CancelAtPeriodEnd,
-			"cancel_at":            api_key_instance.CancelAt,
+		return c.JSON(http.StatusOK, &UsageResponse{
+			RequestsUsed:      api_key_instance.RequestsUsed,
+			RequestLimit:      api_key_instance.RequestLimit,
+			Plan:              api_key_instance.Plan,
+			CancelAtPeriodEnd: api_key_instance.CancelAtPeriodEnd,
+			CancelAt:          api_key_instance.CancelAt,
 		})
 	}
 }

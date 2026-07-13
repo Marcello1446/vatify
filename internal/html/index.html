@@ -401,8 +401,12 @@ color-mix(in oklab, var(--background) 80%, transparent);
   .usage-response .str {
     color: #fbbf24;
   }
-  .usage-response .bool {
+  .usage-response .int {
     color: #08fa51;
+  }
+
+  .bool {
+    color: #c084fc;
   }
 
 
@@ -563,7 +567,6 @@ color-mix(in oklab, var(--background) 80%, transparent);
     <nav class="nav-links">
       <a href="https://vatify-production.up.railway.app/swagger/index.html" target="_blank">Docs</a>
       <a href="#pricing">Pricing</a>
-      <a href="#">Contact</a>
       <a href="/cancel">Cancel Subscription</a>
     </nav>
     <a href="#cta" class="nav-cta">Get API key</a>
@@ -937,8 +940,10 @@ color-mix(in oklab, var(--background) 80%, transparent);
           <div class="endpoint"><span>GET</span> <span class="usage_text">/v1/usage</span> · X-API-Key: ••••••••</div>
           <pre>{
   <span class="key">"plan"</span>: <span class="str">"starter"</span>,
-  <span class="key">"requests_used"</span>: <span class="bool">4271</span>,
-  <span class="key">"request_limit"</span>: <span class="bool">10000</span>
+  <span class="key">"requests_used"</span>: <span class="int">4271</span>,
+  <span class="key">"request_limit"</span>: <span class="int">10000</span>
+  <span class="key">"cancel_at_period_end"</span>: <span class="bool">true</span>
+  <span class="key">"cancel_at"</span>: <span class="str">"Aug 13"</span>
 }</pre>
         </div>
       </div>
