@@ -42,9 +42,11 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 
 		if err := c.Bind(&request); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
-				"Error": "failed to bind data",
+				"Error": "Failed to bind data",
 			})
 		}
+
+		fmt.Println("body: ", request)
 
 		if err := c.Validate(&request); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
