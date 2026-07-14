@@ -89,6 +89,7 @@ func main() {
 	e.GET("/v1/usage", handler.SeeUsage(db), middleware.AuthAPIKey(db))
 	e.POST("/v1/checkout/sessions", handler.CheckoutHandler(*env))
 	e.POST("/v1/webhook", handler.WebhookHandler(db, *env))
+	e.POST("/v1/bulk-validation", handler.BulkValidationHandler(db), middleware.AuthAPIKey(db))
 	e.GET("/*", func(c *echo.Context) error {
 		return c.File("index.html")
 	})

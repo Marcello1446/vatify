@@ -38,6 +38,20 @@ func IncreaseUsedRequests(db *gorm.DB, key string) error {
 	return nil
 }
 
+func IncreaseMultipleUsedRequests(db *gorm.DB, key string, increase_amount int) error {
+	var api_key *model.APIKey
+
+	if res := db.Where("key = ?", key).First(&api_key); res.Error != nil {
+		return res.Error
+	}
+
+	api_key.RequestsUsed += increase_amount
+
+	db.Save(api_key)
+
+	return nil
+}
+
 func FindAllAPIKeysUsageReset(db *gorm.DB) ([]model.APIKey, error) {
 	var api_keys []model.APIKey
 
