@@ -130,11 +130,15 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 							}
 
 						}()
+						fmt.Println("Res inside the function", response.ResponseItems)
 
 					}
+					fmt.Println("Res inside the function", response.ResponseItems)
 
 				}()
+				fmt.Println("Res inside the function", response.ResponseItems)
 			}
+			fmt.Println("Res inside the function", response.ResponseItems)
 		} else {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Insufficient credentials to make such a big request",
