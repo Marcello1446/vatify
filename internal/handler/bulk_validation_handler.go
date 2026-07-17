@@ -123,6 +123,8 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 								return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
 							})
 
+							fmt.Println("Res inside the function", response.ResponseItems)
+
 							if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
 								fmt.Println("Failed to increase usage count for key:", k, "error:", err)
 							}
@@ -139,7 +141,7 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		fmt.Println("Res: ", &response.ResponseItems)
+		fmt.Println("Res outside: ", response.ResponseItems)
 		return c.JSON(http.StatusOK, &response.ResponseItems)
 	}
 }
