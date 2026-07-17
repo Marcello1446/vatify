@@ -118,6 +118,7 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 							for r := range result {
 								response.ResponseItems = append(response.ResponseItems, r)
 								fmt.Println(len(response.ResponseItems))
+								fmt.Println(response.ResponseItems)
 							}
 
 							sort.Slice(response.ResponseItems, func(i, j int) bool {
