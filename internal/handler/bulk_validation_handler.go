@@ -139,6 +139,7 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
+		fmt.Println("Res: ", &response.ResponseItems)
 		return c.JSON(http.StatusOK, &response.ResponseItems)
 	}
 }
