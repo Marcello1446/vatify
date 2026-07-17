@@ -7,18 +7,27 @@ import (
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 	"net/http"
+	"sort"
+	"sync"
 )
 
+type BulkRequestItem struct {
+	SerialNumber int    `json:"-"`
+	VAT          string `json:"vat" validate:"required,min=8,max=13"`
+	CountryCode  string `json:"country_code" validate:"required,len=2,alpha,uppercase,oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SL SK XI"`
+}
+
 type BulkRequest struct {
-	RequestItems []Request `json:"request_items" validate:"required,min=2,max=100,dive"`
+	RequestItems []BulkRequestItem `json:"request_items" validate:"required,min=2,max=100,dive"`
 }
 type BulkResultItem struct {
-	VAT         string `json:"vat"`
-	CountryCode string `json:"country_code"`
-	IsValid     bool   `json:"is_valid,omitempty"`
-	TradeName   string `json:"trade_name,omitempty"`
-	Address     string `json:"address,omitempty"`
-	Error       string `json:"error,omitempty"`
+	SerialNumber int    `json:"-"`
+	VAT          string `json:"vat"`
+	CountryCode  string `json:"country_code"`
+	IsValid      bool   `json:"is_valid,omitempty"`
+	TradeName    string `json:"trade_name,omitempty"`
+	Address      string `json:"address,omitempty"`
+	Error        string `json:"error,omitempty"`
 }
 type BulkResponse struct {
 	ResponseItems []BulkResultItem `json:"response_items"`
@@ -46,8 +55,6 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		fmt.Println("body: ", request)
-
 		if err := c.Validate(&request); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Failed to validate your request. Country Code either VAT number has incorrect format or length of your array is greater than 100",
@@ -55,31 +62,76 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 		}
 
 		if api_key_instance.RequestLimit-api_key_instance.RequestsUsed >= len(request.RequestItems) {
-			for _, v := range request.RequestItems {
-				val, err := service.ValidateVATWithoutIncrementing(db, v.VAT, v.CountryCode)
-				if err != nil {
-					response.ResponseItems = append(response.ResponseItems, BulkResultItem{
-						VAT:         v.VAT,
-						CountryCode: v.CountryCode,
-						IsValid:     false,
-						TradeName:   "",
-						Address:     "",
-						Error:       err.Error(),
-					})
-				} else {
-					response.ResponseItems = append(response.ResponseItems, BulkResultItem{
-						VAT:         val.VAT,
-						CountryCode: val.CountryCode,
-						IsValid:     val.IsVATValid,
-						TradeName:   val.TradeName,
-						Address:     val.Address,
-						Error:       "",
-					})
-				}
-			}
+			work := make(chan BulkRequestItem, len(request.RequestItems))
+			result := make(chan BulkResultItem, len(request.RequestItems))
+			var wg sync.WaitGroup
 
-			if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
-				fmt.Println("Failed to increase usage count for key:", k, "error:", err)
+			go func() {
+				for i, item := range request.RequestItems {
+					item.SerialNumber = i + 1
+					work <- item
+				}
+				close(work)
+			}()
+
+			for i := 0; i < 5; i++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					for item := range work {
+						func() {
+							defer func() {
+								if r := recover(); r != nil {
+									result <- BulkResultItem{VAT: item.VAT, CountryCode: item.CountryCode, Error: fmt.Sprintf("internal error: %v", r)}
+								}
+							}()
+
+							val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
+
+							if err != nil {
+								result <- BulkResultItem{
+									SerialNumber: item.SerialNumber,
+									VAT:          item.VAT,
+									CountryCode:  item.CountryCode,
+									IsValid:      false,
+									TradeName:    "",
+									Address:      "",
+									Error:        err.Error(),
+								}
+							} else {
+								result <- BulkResultItem{
+									SerialNumber: item.SerialNumber,
+									VAT:          val.VAT,
+									CountryCode:  val.CountryCode,
+									IsValid:      val.IsVATValid,
+									TradeName:    val.TradeName,
+									Address:      val.Address,
+									Error:        "",
+								}
+							}
+
+							go func() {
+								wg.Wait()
+								close(result)
+							}()
+
+							for r := range result {
+								response.ResponseItems = append(response.ResponseItems, r)
+							}
+
+							sort.Slice(response.ResponseItems, func(i, j int) bool {
+								return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
+							})
+
+							if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
+								fmt.Println("Failed to increase usage count for key:", k, "error:", err)
+							}
+
+						}()
+
+					}
+
+				}()
 			}
 		} else {
 			return c.JSON(http.StatusBadRequest, map[string]string{
