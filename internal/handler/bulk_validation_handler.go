@@ -3,11 +3,9 @@ package handler
 import (
 	"fmt"
 	"github.com/Marcello1446/vatify/internal/repository"
-	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 	"net/http"
-	"sync"
 )
 
 type BulkRequestItem struct {
@@ -62,84 +60,17 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 
 		if api_key_instance.RequestLimit-api_key_instance.RequestsUsed >= len(request.RequestItems) {
 			work := make(chan BulkRequestItem, len(request.RequestItems))
-			result := make(chan BulkResultItem, len(request.RequestItems))
-			var wg sync.WaitGroup
 
-			go func() {
-				for i, item := range request.RequestItems {
-					item.SerialNumber = i + 1
-					work <- item
-				}
-				close(work)
-			}()
-
-			for i := 0; i < 5; i++ {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					for item := range work {
-						func() {
-							defer func() {
-								if r := recover(); r != nil {
-									result <- BulkResultItem{VAT: item.VAT, CountryCode: item.CountryCode, Error: fmt.Sprintf("internal error: %v", r)}
-								}
-							}()
-						}()
-
-						val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
-
-						if err != nil {
-							result <- BulkResultItem{
-								SerialNumber: item.SerialNumber,
-								VAT:          item.VAT,
-								CountryCode:  item.CountryCode,
-								IsValid:      false,
-								TradeName:    "",
-								Address:      "",
-								Error:        err.Error(),
-							}
-						} else {
-							result <- BulkResultItem{
-								SerialNumber: item.SerialNumber,
-								VAT:          val.VAT,
-								CountryCode:  val.CountryCode,
-								IsValid:      val.IsVATValid,
-								TradeName:    val.TradeName,
-								Address:      val.Address,
-								Error:        "",
-							}
-						}
-
-						go func() {
-							wg.Wait()
-							close(result)
-						}()
-
-						for r := range result {
-							response.ResponseItems = append(response.ResponseItems, r)
-							fmt.Println(len(response.ResponseItems))
-							fmt.Println(response.ResponseItems)
-						}
-
-						//sort.Slice(response.ResponseItems, func(i, j int) bool {
-						//	return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
-						//})
-
-						fmt.Println("Res inside the function", response.ResponseItems)
-
-						if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
-							fmt.Println("Failed to increase usage count for key:", k, "error:", err)
-						}
-
-						fmt.Println("Res inside the function", response.ResponseItems)
-
-					}
-					fmt.Println("Res inside the function", response.ResponseItems)
-
-				}()
-				fmt.Println("Res inside the function", response.ResponseItems)
+			for i, item := range request.RequestItems {
+				item.SerialNumber = i + 1
+				work <- item
 			}
-			fmt.Println("Res inside the function", response.ResponseItems)
+			close(work)
+
+			for value := range work {
+				fmt.Println("Every item that is lying in work channel", value)
+			}
+
 		} else {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"Error": "Insufficient credentials to make such a big request",
