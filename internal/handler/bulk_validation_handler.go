@@ -89,7 +89,11 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 				}()
 			}
 
-			wg.Wait()
+			go func() {
+				wg.Wait()
+				close(result)
+			}()
+
 			for value := range result {
 				fmt.Println("Every item that is lying inside result chan", value)
 			}
