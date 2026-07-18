@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/Marcello1446/vatify/internal/repository"
+	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 	"net/http"
@@ -75,14 +76,28 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 				go func() {
 					defer wg.Done()
 					for item := range work {
-						result <- BulkResultItem{
-							SerialNumber: item.SerialNumber,
-							VAT:          item.VAT,
-							CountryCode:  item.CountryCode,
-							IsValid:      false,
-							TradeName:    "",
-							Address:      "",
-							Error:        "",
+						val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
+
+						if err != nil {
+							result <- BulkResultItem{
+								SerialNumber: item.SerialNumber,
+								VAT:          item.VAT,
+								CountryCode:  item.CountryCode,
+								IsValid:      false,
+								TradeName:    "",
+								Address:      "",
+								Error:        err.Error(),
+							}
+						} else {
+							result <- BulkResultItem{
+								SerialNumber: item.SerialNumber,
+								VAT:          val.VAT,
+								CountryCode:  val.CountryCode,
+								IsValid:      val.IsVATValid,
+								TradeName:    val.TradeName,
+								Address:      val.Address,
+								Error:        "",
+							}
 						}
 					}
 
