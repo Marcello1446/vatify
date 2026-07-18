@@ -121,9 +121,9 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 								fmt.Println(response.ResponseItems)
 							}
 
-							sort.Slice(response.ResponseItems, func(i, j int) bool {
-								return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
-							})
+							//sort.Slice(response.ResponseItems, func(i, j int) bool {
+							//	return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
+							//})
 
 							fmt.Println("Res inside the function", response.ResponseItems)
 
