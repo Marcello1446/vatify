@@ -61,6 +61,7 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 
 		if api_key_instance.RequestLimit-api_key_instance.RequestsUsed >= len(request.RequestItems) {
 			work := make(chan BulkRequestItem, len(request.RequestItems))
+			result := make(chan BulkRequestItem, len(request.RequestItems))
 			var wg sync.WaitGroup
 
 			for i, item := range request.RequestItems {
@@ -69,14 +70,21 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 			}
 			close(work)
 
-			wg.Add(1)
+			for j := 0; j < 5; j++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					for item := range work {
+						result <- BulkRequestItem{
+							SerialNumber: item.SerialNumber,
+							VAT:          item.VAT,
+							CountryCode:  item.CountryCode,
+						}
+						fmt.Println("Every struct item that is lying in result channel: ", item)
+					}
 
-			go func() {
-				defer wg.Done()
-				for item := range work {
-					fmt.Println("Every struct that is lying in work channel: ", item)
-				}
-			}()
+				}()
+			}
 
 			wg.Wait()
 
