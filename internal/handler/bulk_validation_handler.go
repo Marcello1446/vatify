@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 	"net/http"
+	"sync"
 )
 
 type BulkRequestItem struct {
@@ -60,6 +61,7 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 
 		if api_key_instance.RequestLimit-api_key_instance.RequestsUsed >= len(request.RequestItems) {
 			work := make(chan BulkRequestItem, len(request.RequestItems))
+			var wg sync.WaitGroup
 
 			for i, item := range request.RequestItems {
 				item.SerialNumber = i + 1
@@ -67,9 +69,16 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 			}
 			close(work)
 
-			for value := range work {
-				fmt.Println("Every item that is lying in work channel", value)
-			}
+			wg.Add(1)
+
+			go func() {
+				defer wg.Done()
+				for item := range work {
+					fmt.Println("Every struct that is lying in work channel: ", item)
+				}
+			}()
+
+			wg.Wait()
 
 		} else {
 			return c.JSON(http.StatusBadRequest, map[string]string{
@@ -77,7 +86,6 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		fmt.Println("Res outside: ", response.ResponseItems)
-		return c.JSON(http.StatusOK, &response.ResponseItems)
+		return c.JSON(http.StatusOK, response.ResponseItems)
 	}
 }
