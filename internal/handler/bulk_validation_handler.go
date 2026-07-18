@@ -84,53 +84,53 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 									result <- BulkResultItem{VAT: item.VAT, CountryCode: item.CountryCode, Error: fmt.Sprintf("internal error: %v", r)}
 								}
 							}()
-
-							val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
-
-							if err != nil {
-								result <- BulkResultItem{
-									SerialNumber: item.SerialNumber,
-									VAT:          item.VAT,
-									CountryCode:  item.CountryCode,
-									IsValid:      false,
-									TradeName:    "",
-									Address:      "",
-									Error:        err.Error(),
-								}
-							} else {
-								result <- BulkResultItem{
-									SerialNumber: item.SerialNumber,
-									VAT:          val.VAT,
-									CountryCode:  val.CountryCode,
-									IsValid:      val.IsVATValid,
-									TradeName:    val.TradeName,
-									Address:      val.Address,
-									Error:        "",
-								}
-							}
-
-							go func() {
-								wg.Wait()
-								close(result)
-							}()
-
-							for r := range result {
-								response.ResponseItems = append(response.ResponseItems, r)
-								fmt.Println(len(response.ResponseItems))
-								fmt.Println(response.ResponseItems)
-							}
-
-							//sort.Slice(response.ResponseItems, func(i, j int) bool {
-							//	return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
-							//})
-
-							fmt.Println("Res inside the function", response.ResponseItems)
-
-							if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
-								fmt.Println("Failed to increase usage count for key:", k, "error:", err)
-							}
-
 						}()
+
+						val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
+
+						if err != nil {
+							result <- BulkResultItem{
+								SerialNumber: item.SerialNumber,
+								VAT:          item.VAT,
+								CountryCode:  item.CountryCode,
+								IsValid:      false,
+								TradeName:    "",
+								Address:      "",
+								Error:        err.Error(),
+							}
+						} else {
+							result <- BulkResultItem{
+								SerialNumber: item.SerialNumber,
+								VAT:          val.VAT,
+								CountryCode:  val.CountryCode,
+								IsValid:      val.IsVATValid,
+								TradeName:    val.TradeName,
+								Address:      val.Address,
+								Error:        "",
+							}
+						}
+
+						go func() {
+							wg.Wait()
+							close(result)
+						}()
+
+						for r := range result {
+							response.ResponseItems = append(response.ResponseItems, r)
+							fmt.Println(len(response.ResponseItems))
+							fmt.Println(response.ResponseItems)
+						}
+
+						//sort.Slice(response.ResponseItems, func(i, j int) bool {
+						//	return response.ResponseItems[i].SerialNumber < response.ResponseItems[j].SerialNumber
+						//})
+
+						fmt.Println("Res inside the function", response.ResponseItems)
+
+						if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
+							fmt.Println("Failed to increase usage count for key:", k, "error:", err)
+						}
+
 						fmt.Println("Res inside the function", response.ResponseItems)
 
 					}
