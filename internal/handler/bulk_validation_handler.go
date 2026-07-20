@@ -1,32 +1,28 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/Marcello1446/vatify/internal/repository"
 	"github.com/Marcello1446/vatify/internal/service"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 	"net/http"
-	"sync"
 )
 
 type BulkRequestItem struct {
-	SerialNumber int    `json:"-"`
-	VAT          string `json:"vat" validate:"required,min=8,max=13"`
-	CountryCode  string `json:"country_code" validate:"required,len=2,alpha,uppercase,oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SL SK XI"`
+	VAT         string `json:"vat" validate:"required,min=8,max=13"`
+	CountryCode string `json:"country_code" validate:"required,len=2,alpha,uppercase,oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SL SK XI"`
 }
 
 type BulkRequest struct {
 	RequestItems []BulkRequestItem `json:"request_items" validate:"required,min=2,max=100,dive"`
 }
 type BulkResultItem struct {
-	SerialNumber int    `json:"-"`
-	VAT          string `json:"vat"`
-	CountryCode  string `json:"country_code"`
-	IsValid      bool   `json:"is_valid,omitempty"`
-	TradeName    string `json:"trade_name,omitempty"`
-	Address      string `json:"address,omitempty"`
-	Error        string `json:"error,omitempty"`
+	VAT         string `json:"vat"`
+	CountryCode string `json:"country_code"`
+	IsValid     bool   `json:"is_valid,omitempty"`
+	TradeName   string `json:"trade_name,omitempty"`
+	Address     string `json:"address,omitempty"`
+	Error       string `json:"error,omitempty"`
 }
 type BulkResponse struct {
 	ResponseItems []BulkResultItem `json:"response_items"`
@@ -61,58 +57,34 @@ func BulkValidationHandler(db *gorm.DB) echo.HandlerFunc {
 		}
 
 		if api_key_instance.RequestLimit-api_key_instance.RequestsUsed >= len(request.RequestItems) {
-			work := make(chan BulkRequestItem, len(request.RequestItems))
-			result := make(chan BulkResultItem, len(request.RequestItems))
-			var wg sync.WaitGroup
+			for _, item := range request.RequestItems {
+				val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
 
-			for i, item := range request.RequestItems {
-				item.SerialNumber = i + 1
-				work <- item
-			}
-			close(work)
-
-			for j := 0; j < 5; j++ {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					for item := range work {
-						func() {
-							val, err := service.ValidateVATWithoutIncrementing(db, item.VAT, item.CountryCode)
-
-							if err != nil {
-								result <- BulkResultItem{
-									SerialNumber: item.SerialNumber,
-									VAT:          item.VAT,
-									CountryCode:  item.CountryCode,
-									IsValid:      false,
-									TradeName:    "",
-									Address:      "",
-									Error:        err.Error(),
-								}
-							} else {
-								result <- BulkResultItem{
-									SerialNumber: item.SerialNumber,
-									VAT:          val.VAT,
-									CountryCode:  val.CountryCode,
-									IsValid:      val.IsVATValid,
-									TradeName:    val.TradeName,
-									Address:      val.Address,
-									Error:        "",
-								}
-							}
-						}()
-					}
-
-				}()
+				if err != nil {
+					response.ResponseItems = append(response.ResponseItems, BulkResultItem{
+						VAT:         item.VAT,
+						CountryCode: item.CountryCode,
+						IsValid:     false,
+						TradeName:   "",
+						Address:     "",
+						Error:       err.Error(),
+					})
+				} else {
+					response.ResponseItems = append(response.ResponseItems, BulkResultItem{
+						VAT:         val.VAT,
+						CountryCode: val.CountryCode,
+						IsValid:     val.IsVATValid,
+						TradeName:   val.TradeName,
+						Address:     val.Address,
+						Error:       "",
+					})
+				}
 			}
 
-			go func() {
-				wg.Wait()
-				close(result)
-			}()
-
-			for value := range result {
-				fmt.Println("Every item that is lying inside result chan", value)
+			if err := repository.IncreaseMultipleUsedRequests(db, k, len(request.RequestItems)); err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"Error": "Failed to increase used requests amount",
+				})
 			}
 
 		} else {
