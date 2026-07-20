@@ -28,6 +28,10 @@ func Check(countryCode, VATNumber string) (*VIESResult, error) {
 		return nil, err
 	}
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("VIES returned status %d for %s/%s", res.StatusCode, countryCode, VATNumber)
+	}
+
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
